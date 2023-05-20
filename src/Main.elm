@@ -12,7 +12,7 @@ import String exposing (fromFloat)
 import String exposing (fromInt)
 import List exposing (take, head, drop, length)
 import Mailto exposing (Mailto, mailto, subject, cc, bcc, body)
-
+import Base exposing (..)
 
 type alias Model =
 
@@ -71,16 +71,20 @@ update msg model =
 
 menu : Element msg
 menu =
-    row
-        [ width fill, height fill, Font.size 11, padding 10, Font.color <| rgb 255 255 255]
-        [ el [alignLeft, centerY] <| paragraph [rotate <| degrees -90, Font.center] <| [ text "About"]
-        , el [alignRight, centerY] <| paragraph [rotate <| degrees -90, Font.center] <| [
-            link []
-                { url = partnerMailto
-                , label = text "mikeldalmauc@gmail.com"
-                }
+    let
+        name = el (brandFontAttrs ++ [ width fill, centerX, Font.color <| rgb 255 255 255]) <| paragraph [ Font.center,  Font.size 20, padding 70] [ text "Mikel Dalmau" ]
+    in
+        row
+             (baseFontAttrs ++ [width fill, height fill, padding 5, Font.size 12, inFront name, Font.color <| rgb 255 255 255])
+            [ el [alignLeft, centerY] <| paragraph [rotate <| degrees -90, Font.center] <| [ text "About"]
+            , paragraph [alignRight, centerY, width shrink, height shrink, rotate <| degrees -90, Font.center] <| [
+                link []
+                    { url = partnerMailto
+                    , label = text "mikeldalmauc@gmail.com"
+                    }
+                ]
             ]
-        ]
+
 
 partnerMailto : String
 partnerMailto =
@@ -109,7 +113,7 @@ infoDebug model =
 
 tabs : List (Model -> Element msg )
 tabs = 
-    [viewTab1, viewTab2, viewTab3]
+    [viewTab1, viewTab2, viewTab3, viewTab4, viewTab5, viewTab6, viewTab7]
     
 viewTab : Model -> Element msg
 viewTab model =
@@ -139,15 +143,15 @@ viewTab1 model =
     el [ centerX, centerY] 
         <|
             column
-            [ width fill, height fill, Font.color <| rgb 255 255 255]
+            [ width fill, height fill, Font.color <| rgb 255 255 255, spacing 10]
             [
                 paragraph
-                    [ Font.size 48, Font.center ]
-                    [ el [ Font.italic ] <| text "Mikel Dalmau" ]
+                    (brandFontAttrs ++ [Font.size 60, Font.center ])
+                    [ text "Mikel Dalmau" ]
             ,
                 paragraph
-                    [ Font.size 48, Font.center ]
-                    [ el [ Font.italic ] <| text "Image engineer"]
+                    (baseFontAttrs ++ [Font.size 22, Font.center])
+                    [ text "Image engineer"]
             ]
 
 viewTab2 : Model -> Element msg
@@ -172,6 +176,50 @@ viewTab3 model =
                 paragraph
                     [ Font.size 48, Font.center ]
                     [ el [ Font.italic ] <| text "Tab 3" ]
+            ]
+viewTab4 : Model -> Element msg
+viewTab4 model = 
+    el [ centerX, centerY] 
+        <|
+            column
+            [ width fill, height fill, Font.color <| rgb 255 255 255]
+            [
+                paragraph
+                    [ Font.size 48, Font.center ]
+                    [ el [ Font.italic ] <| text "Tab 4" ]
+            ]
+viewTab5 : Model -> Element msg
+viewTab5 model = 
+    el [ centerX, centerY] 
+        <|
+            column
+            [ width fill, height fill, Font.color <| rgb 255 255 255]
+            [
+                paragraph
+                    [ Font.size 48, Font.center ]
+                    [ el [ Font.italic ] <| text "Tab 5" ]
+            ]
+viewTab6 : Model -> Element msg
+viewTab6 model = 
+    el [ centerX, centerY] 
+        <|
+            column
+            [ width fill, height fill, Font.color <| rgb 255 255 255]
+            [
+                paragraph
+                    [ Font.size 48, Font.center ]
+                    [ el [ Font.italic ] <| text "Tab 6" ]
+            ]
+viewTab7 : Model -> Element msg
+viewTab7 model = 
+    el [ centerX, centerY] 
+        <|
+            column
+            [ width fill, height fill, Font.color <| rgb 255 255 255]
+            [
+                paragraph
+                    [ Font.size 48, Font.center ]
+                    [ el [ Font.italic ] <| text "Tab 7" ]
             ]
 
 -- Subscribe to the `messageReceiver` port to hear about messages coming in
