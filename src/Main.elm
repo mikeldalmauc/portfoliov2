@@ -14,12 +14,16 @@ import List exposing (take, head, drop, length)
 import Mailto exposing (Mailto, mailto, subject, cc, bcc, body)
 import Base exposing (..)
 import Element.Events exposing (onClick)
+import Swiper
 
 type alias Model =
 
-    {   tab : Int
-    ,   tabState : TabState
-    ,   wheelModel : WheelModel
+    { tab : Int
+    , tabState : TabState
+    , wheelModel : WheelModel
+    , swipingState : Swiper.SwipingState
+    , userSwipedDown : Bool
+    , userSwipedUp : Bool
     }
 
 type alias WheelModel =
@@ -33,6 +37,7 @@ type TabState
 
 type Msg =
       Wheel WheelModel
+    | Swiped Swiper.SwipeEvent
     | Head
     | NoOp
 
@@ -42,16 +47,16 @@ init =
         tab = 0
       , tabState = Loaded
       , wheelModel = initWheelModel
+      , swipingState = Swiper.initialSwipingState
+      , userSwipedDown = False
+      , userSwipedUp = False
       }
     , Cmd.none
     )
 
-
 initWheelModel : WheelModel
 initWheelModel = 
     { deltaX = 0, deltaY = 0 }
-
-
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -66,25 +71,26 @@ update msg model =
                         ( {model | tab = previousTab model.tab, wheelModel = initWheelModel} , Cmd.none )
                     else
                         ( {model | tab = nextTab model.tab, wheelModel = initWheelModel} , Cmd.none )
+        Swiped evt ->
+            let
+                (newStateDown, swipedDown) =
+                    Swiper.hasSwipedDown evt model.swipingState
+                
+                (newStateUp, swipedUp) =
+                    Swiper.hasSwipedUp evt model.swipingState
+            in
+                if swipedDown then
+                    ( { model | tab = previousTab model.tab, swipingState = newStateDown, userSwipedDown = swipedDown}, Cmd.none )
+                else
+                    if swipedUp then
+                        ( { model | tab = nextTab model.tab, swipingState = newStateUp, userSwipedUp = swipedUp}, Cmd.none )
+                    else
+                        (  { model | swipingState = newStateUp}, Cmd.none )
+
         Head -> 
             ( {model | tab = 0} , Cmd.none )
         NoOp ->
             ( model, Cmd.none )
-
-
--- menu : Element Msg
--- menu =
---     row
---             (baseFontAttrs ++ [explain Debug.todo, width fill, height fill, padding 5, Font.size 12, inFront name, Font.color <| rgb 255 255 255])
---         [ el [alignLeft, centerY] <| paragraph [rotate <| degrees -90, Font.center, onClick Head, pointer] <| [ text "About"]
---         , paragraph [alignRight, centerY, rotate <| degrees -90, Font.center] <| [
---             link []
---                 { url = partnerMailto
---                 , label = text "mikeldalmauc@gmail.com"
---                 }
---             ]
---         ]
-
 
 partnerMailto : String
 partnerMailto =
@@ -99,29 +105,31 @@ view model =
         name = el (brandFontAttrs ++ [ width fill, height <| fillPortion 1, centerX, Font.color <| rgb 255 255 255]) 
             <| paragraph [ Font.center, centerY, Font.size 20, padding 40, onClick Head, pointer] [ text "Mikel Dalmau" ]
 
-        attrs = (baseFontAttrs ++ [ width <| fillPortion 2, height fill, Font.size 12, Font.color <| rgb 255 255 255])
-        menuL = el (attrs ++ []) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick Head, pointer, moveLeft 60] <| [ text "About"]
-        menuR = el (attrs ++ []) <| paragraph [Font.center, centerY, rotate <| degrees -90, moveRight 60] <| [
+        attrs = (baseFontAttrs ++ [width (fillPortion 1), height (fillPortion 1), Font.size 12, Font.color <| rgb 255 255 255])
+        menuL = el (attrs ++ [alignLeft]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick Head, pointer] <| [ text "About"]
+        menuR = el (attrs ++ [alignRight]) <| paragraph [Font.center, centerY, rotate <| degrees -90] <| [
             link []
                 { url = partnerMailto
                 , label = text "mikeldalmauc@gmail.com"}
             ]
      
     in
-        layout
-            [ width fill, height fill, Background.color <| rgb 0 0 0 
+        Html.div ([] ++ Swiper.onSwipeEvents Swiped) 
+        [layout
+            [ width fill, height fill, Background.color <| rgb 0 0 0
                 -- , behindContent <| infoDebug model -- TODO hide maybe
-            ]
+            ] 
             <| column
                 [ height fill, width fill]
                 [ name
                 , row
-                    [ height <| fillPortion 18, width fill]
+                    [ height <| fillPortion 18, width fill, spaceEvenly]
                     [ menuL
                     , viewTab model
                     , menuR]
                 , el [height <| fillPortion 1] none
                 ]
+        ]
 
 infoDebug : Model -> Element msg
 infoDebug model =
@@ -141,9 +149,9 @@ viewTab : Model -> Element Msg
 viewTab model =
     case (head <| drop model.tab tabs ) of
         Just tab ->
-            el [width <| fillPortion 20, height fill] <| tab model
+            el [width (fillPortion 3), height (fillPortion 1)] <| tab model
         Nothing ->
-            el [width <| fillPortion 20, height fill] <| viewTab1 model
+            el [width (fillPortion 3), height (fillPortion 1)] <| viewTab1 model
 
 nextTab : Int -> Int
 nextTab actual  =   

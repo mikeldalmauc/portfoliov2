@@ -1,12 +1,10 @@
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=Edge">
   <meta name="viewport" content="width=device-width initial-scale=1.0 maximum-scale=1.0 user-scalable=no">
 
   <link rel="icon" href="assets/favicon.svg">
-
-  <link rel="shortcut icon" href="media/assets/favicon.ico" type="image/x-icon">
 
   <meta property="og:title" content="Mikel Dalmau">
   <meta name="description" content="Image Engineer">
@@ -24,8 +22,26 @@
   <meta itemprop="description" content="MImage Engineer">
   <meta name="author" content="Mikel Dalmau">
 
-  <script src="build/main.js"></script>
+  <script src="main.js"></script>
   <title>Mikel Dalmau Image Engineer</title>
+  <style>
+    html,
+    body {
+      overscroll-behavior-y: none;
+      overscroll-behavior-x: none;
+    }
+    #app{
+      overscroll-behavior-x: none;
+      overscroll-behavior-y: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      overflow: hidden;
+    }
+  </style>
 </head>
 
 <body>
