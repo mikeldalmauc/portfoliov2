@@ -3,6 +3,7 @@ port module Main exposing (..)
 import Element exposing (..)
 import Element.Border as Border
 import Element.Font as Font
+import Browser.Events exposing (onResize)
 import Element.Background as Background
 import Html exposing (Html)
 import Browser
@@ -20,6 +21,7 @@ type alias Model =
 
     { tab : Int
     , tabState : TabState
+    , device : Device
     , wheelModel : WheelModel
     , swipingState : Swiper.SwipingState
     , userSwipedDown : Bool
@@ -31,6 +33,11 @@ type alias WheelModel =
     , deltaY : Float
     }
 
+type alias Flags =
+    { width : Int
+    , height : Int
+    }
+
 type TabState
     = Loading
     | Loaded
@@ -38,14 +45,16 @@ type TabState
 type Msg =
       Wheel WheelModel
     | Swiped Swiper.SwipeEvent
+    | DeviceClassified Device
     | Head
     | NoOp
 
-init : ( Model, Cmd Msg )
-init =
+init : Flags -> ( Model, Cmd Msg )
+init flags =
     ( { 
         tab = 0
       , tabState = Loaded
+      , device = Element.classifyDevice flags
       , wheelModel = initWheelModel
       , swipingState = Swiper.initialSwipingState
       , userSwipedDown = False
@@ -85,7 +94,10 @@ update msg model =
                     if swipedUp then
                         ( { model | tab = nextTab model.tab, swipingState = newStateUp, userSwipedUp = swipedUp}, Cmd.none )
                     else
-                        (  { model | swipingState = newStateUp}, Cmd.none )
+                        (  { model | swipingState = newStateDown}, Cmd.none )
+
+        DeviceClassified device ->
+            ( { model | device = device } , Cmd.none)
 
         Head -> 
             ( {model | tab = 0} , Cmd.none )
@@ -120,7 +132,7 @@ view model =
                 -- , behindContent <| infoDebug model -- TODO hide maybe
             ] 
             <| column
-                [ height fill, width fill]
+                [ explain Debug.todo,height fill, width fill]
                 [ name
                 , row
                     [ height <| fillPortion 18, width fill, spaceEvenly]
@@ -285,12 +297,15 @@ subscriptions model =
                     Err _ ->
                         NoOp
             )
+        , onResize 
+            (\width height ->
+                DeviceClassified (Element.classifyDevice { width = width, height = height }))
         ]
 
-main : Program () Model Msg
+main : Program Flags Model Msg
 main =
     Browser.element
-        { init = always init
+        { init = init
         , view = view
         , update = update
         , subscriptions = subscriptions
