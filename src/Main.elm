@@ -15,7 +15,7 @@ import String exposing (fromInt)
 import List exposing (take, head, drop, length)
 import Base exposing (..)
 import Element.Events exposing (onClick)
-import Swiper
+import Swipe
 import Html.Attributes exposing (align)
 import String exposing (right)
 import Gallery
@@ -29,10 +29,8 @@ type alias Model =
     , tabState : TabState
     , device : Device
     , wheelModel : WheelModel
-    , swipingState : Swiper.SwipingState
-    , userSwipedDown : Bool
-    , userSwipedUp : Bool
-    , galleryTab1 : Gallery.State 
+    , galleryTab1 : Gallery.State
+    , gesture : Swipe.Gesture
     }
 
 type alias WheelModel =
@@ -51,7 +49,8 @@ type TabState
 
 type Msg =
       Wheel WheelModel
-    | Swiped Swiper.SwipeEvent
+    | Swipe Swipe.Event
+    | SwipeEnd Swipe.Event
     | UserMovedSlider Int
     | DeviceClassified Device
     | GalleryMsg Gallery.Msg
@@ -60,16 +59,13 @@ type Msg =
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( { 
-        tab = 0
-      , tabState = Loaded
-      , device = Element.classifyDevice flags
-      , wheelModel = initWheelModel
-      , swipingState = Swiper.initialSwipingState
-      , userSwipedDown = False
-      , userSwipedUp = False
-      , galleryTab1 = Gallery.init (List.length ViewTab1.images)
-      }
+    ({    tab = 0
+        , tabState = Loaded
+        , device = Element.classifyDevice flags
+        , wheelModel = initWheelModel
+        , gesture = Swipe.blanco
+        , galleryTab1 = Gallery.init (List.length ViewTab1.images)
+    }
     , Cmd.none
     )
 
@@ -90,33 +86,23 @@ update msg model =
                         ( {model | tab = previousTab model.tab, wheelModel = initWheelModel} , Cmd.none )
                     else
                         ( {model | tab = nextTab model.tab, wheelModel = initWheelModel} , Cmd.none )
-        Swiped evt ->
-            let
-                (newStateDown, swipedDown) =
-                    Swiper.hasSwipedDown evt model.swipingState
-                
-                (newStateUp, swipedUp) =
-                    Swiper.hasSwipedUp evt model.swipingState
-                
-                (newStateLeft, swipedLeft) =
-                    Swiper.hasSwipedLeft evt model.swipingState
+        
+        
+        Swipe touch ->
+            ({ model | gesture = Swipe.record touch model.gesture }, Cmd.none)
                     
-                (newStateRight, swipedRight) =
-                    Swiper.hasSwipedRight evt model.swipingState
-            in
-                if swipedDown then
-                    ( { model | tab = previousTab model.tab, swipingState = newStateDown, userSwipedDown = swipedDown}, Cmd.none )
-                else
-                    if swipedUp then
-                        ( { model | tab = nextTab model.tab, swipingState = newStateUp, userSwipedUp = swipedUp}, Cmd.none )
+        SwipeEnd touch ->
+            let
+                gesture = Swipe.record touch model.gesture
+                newTab = 
+                    if (Swipe.isUpSwipe 150.0 gesture) then
+                        nextTab model.tab
+                    else if (Swipe.isDownSwipe 150.0 gesture) then
+                        previousTab model.tab
                     else
-                        if swipedLeft then
-                              (  model , Cmd.none )
-                        else
-                            if swipedRight then
-                                 ( model , Cmd.none )
-                            else
-                                (  model , Cmd.none )
+                        model.tab
+            in
+                ({ model | gesture = Swipe.blanco, tab = newTab}, Cmd.none)
 
         UserMovedSlider v ->
             ({ model | tab = (v // 10) }, Cmd.none)
@@ -151,24 +137,32 @@ view model =
                 else
                     el [width <| fillPortion 3, height fill] none
     in
-        Html.div ([] ++ Swiper.onSwipeEvents Swiped) 
-        [layout
-            [ width fill, height fill, Background.color black08
-                -- , behindContent <| infoDebug model -- TODO hide maybe
-            ] 
-            <| column
-                [ height fill, width fill]
-                [ name
-                , row
-                    [ height <| fillPortion 18, width fill, spaceEvenly]
-                    [  menuL
-                    , el [width <| fillPortion 3, height fill] none
-                    , viewTab model
-                    , slider
-                    , menuR]
-                , el [height <| fillPortion 1] none
-                ]
-        ]
+        Html.div 
+            [ Swipe.onStart Swipe
+            , Swipe.onMove Swipe
+            , Swipe.onEndWithOptions 
+                { stopPropagation = True
+                , preventDefault = False
+                } 
+                SwipeEnd
+            ]
+            [ layout
+                [ width fill, height fill, Background.color black08
+                    , behindContent <| infoDebug model -- TODO hide maybe
+                ] 
+                <|  column
+                    [ height fill, width fill]
+                    [ name
+                    , row
+                        [ height <| fillPortion 18, width fill, spaceEvenly]
+                        [  menuL
+                        , el [width <| fillPortion 3, height fill] none
+                        , viewTab model
+                        , slider
+                        , menuR]
+                    , el [height <| fillPortion 1] none
+                    ]
+            ]
 
 infoDebug : Model -> Element msg
 infoDebug model =
@@ -177,6 +171,9 @@ infoDebug model =
         [ text <| "wheel Delta Y: " ++ fromFloat model.wheelModel.deltaY
         , text <| "wheel Delta X: " ++ fromFloat model.wheelModel.deltaX
         , text <| "tab: " ++ fromInt model.tab
+        , text <| "device: " ++ Debug.toString model.device
+        , text <| "galleryTab1: " ++ Debug.toString model.galleryTab1
+        , text <| "gesture: " ++ Debug.toString model.gesture
         ]
 
 
@@ -270,7 +267,7 @@ viewTab1 model =
             [
                 
                 html <| Html.div [] <| [ViewTab1.styling] ++ [Html.map GalleryMsg <|
-                    Gallery.view ViewTab1.imageConfig model.galleryTab1 [ ] ViewTab1.imageSlides]
+                    Gallery.view ViewTab1.imageConfig model.galleryTab1 [ Gallery.Arrows  ] ViewTab1.imageSlides]
                     
             ]
 
