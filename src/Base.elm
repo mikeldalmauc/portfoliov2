@@ -1,9 +1,32 @@
 module Base exposing (..)
 
-import Element exposing (Attribute, rgb, rgba)
+import Element exposing (Attribute, rgb)
 import Element.Font as Font
 import Element exposing (Color)
+import Mailto exposing (mailto, subject)
+import Gallery.Image exposing (..)
+import Html
+import Html.Attributes as Attrs
 
+slideCustom : List (Html.Attribute msg) -> Url -> Size -> Html.Html msg
+slideCustom attrs url size =
+    Html.img
+        ([ Attrs.src url
+         , Attrs.style "object-fit" (toObjectFit size)
+         , Attrs.class "elm-gallery-image"
+         ]
+            ++ attrs
+        )
+        []
+
+toObjectFit : Size -> String
+toObjectFit size =
+    case size of
+        Cover ->
+            "cover"
+
+        Contain ->
+            "contain"
 
 brandFontAttrs : List (Attribute msg)
 brandFontAttrs =
@@ -18,6 +41,11 @@ brandFont = Font.family
             , Font.serif
             ]
 
+partnerMailto : String
+partnerMailto =
+    mailto "mikeldalmauc@gmail.co"
+        |> subject "Hello Mikel"
+        |> Mailto.toString
 
 baseFontAttrs : List (Attribute msg)
 baseFontAttrs =

@@ -13,12 +13,15 @@ import Json.Decode as Decode exposing (Decoder, Value)
 import String exposing (fromFloat)
 import String exposing (fromInt)
 import List exposing (take, head, drop, length)
-import Mailto exposing (Mailto, mailto, subject, cc, bcc, body)
 import Base exposing (..)
 import Element.Events exposing (onClick)
 import Swiper
 import Html.Attributes exposing (align)
 import String exposing (right)
+import Gallery
+import Gallery.Image as Image
+import Platform.Cmd as Cmd
+import ViewTab1
 
 type alias Model =
 
@@ -29,6 +32,7 @@ type alias Model =
     , swipingState : Swiper.SwipingState
     , userSwipedDown : Bool
     , userSwipedUp : Bool
+    , galleryTab1 : Gallery.State 
     }
 
 type alias WheelModel =
@@ -50,6 +54,7 @@ type Msg =
     | Swiped Swiper.SwipeEvent
     | UserMovedSlider Int
     | DeviceClassified Device
+    | GalleryMsg Gallery.Msg
     | Head
     | NoOp
 
@@ -63,6 +68,7 @@ init flags =
       , swipingState = Swiper.initialSwipingState
       , userSwipedDown = False
       , userSwipedUp = False
+      , galleryTab1 = Gallery.init (List.length ViewTab1.images)
       }
     , Cmd.none
     )
@@ -91,6 +97,12 @@ update msg model =
                 
                 (newStateUp, swipedUp) =
                     Swiper.hasSwipedUp evt model.swipingState
+                
+                (newStateLeft, swipedLeft) =
+                    Swiper.hasSwipedLeft evt model.swipingState
+                    
+                (newStateRight, swipedRight) =
+                    Swiper.hasSwipedRight evt model.swipingState
             in
                 if swipedDown then
                     ( { model | tab = previousTab model.tab, swipingState = newStateDown, userSwipedDown = swipedDown}, Cmd.none )
@@ -98,7 +110,13 @@ update msg model =
                     if swipedUp then
                         ( { model | tab = nextTab model.tab, swipingState = newStateUp, userSwipedUp = swipedUp}, Cmd.none )
                     else
-                        (  { model | swipingState = newStateDown}, Cmd.none )
+                        if swipedLeft then
+                              (  model , Cmd.none )
+                        else
+                            if swipedRight then
+                                 ( model , Cmd.none )
+                            else
+                                (  model , Cmd.none )
 
         UserMovedSlider v ->
             ({ model | tab = (v // 10) }, Cmd.none)
@@ -106,16 +124,13 @@ update msg model =
         DeviceClassified device ->
             ( { model | device = device } , Cmd.none)
 
+        GalleryMsg galleryMsg ->
+            ({ model | galleryTab1 = Gallery.update galleryMsg model.galleryTab1 }, Cmd.none)
+            
         Head -> 
             ( {model | tab = 0} , Cmd.none )
         NoOp ->
             ( model, Cmd.none )
-
-partnerMailto : String
-partnerMailto =
-    mailto "mikeldalmauc@gmail.co"
-        |> subject "Hello Mikel"
-        |> Mailto.toString
 
 
 view : Model -> Html Msg
@@ -131,7 +146,10 @@ view model =
                 { url = partnerMailto
                 , label = text "mikeldalmauc@gmail.com"}
             ]
-     
+        slider = if model.tab > 0 then 
+                    el [width <| fillPortion 3, height fill, onRight <| tabsSlider model.tab ] none
+                else
+                    el [width <| fillPortion 3, height fill] none
     in
         Html.div ([] ++ Swiper.onSwipeEvents Swiped) 
         [layout
@@ -146,7 +164,7 @@ view model =
                     [  menuL
                     , el [width <| fillPortion 3, height fill] none
                     , viewTab model
-                    , el [width <| fillPortion 3, height fill, onRight  <| tabsSlider model.tab ] none
+                    , slider
                     , menuR]
                 , el [height <| fillPortion 1] none
                 ]
@@ -209,14 +227,13 @@ tabsSlider actual =
         { onChange = UserMovedSlider << round
         , label = Input.labelHidden ("Integer value: " ++ String.fromInt (actual*10))
         , min = 10 * (toFloat (List.length tabs) - 1)
-        , max = 1
+        , max = 10
         , step = Just 10
         , value = toFloat actual*10
         , thumb = Input.defaultThumb
         }
     
-
-
+            
 
 viewTab0 : Model -> Element Msg 
 viewTab0 model = 
@@ -242,19 +259,23 @@ viewTab0 model =
                         [ text "Image engineer"]
                 ]
 
-viewTab1 : Model -> Element msg
+
+
+viewTab1 : Model -> Element Msg
 viewTab1 model = 
     el [ centerX, centerY] 
         <|
             column
             [ width fill, height fill, Font.color <| rgb 255 255 255]
             [
-                paragraph
-                    [ Font.size 48, Font.center ]
-                    [ el [ Font.italic ] <| text "Tab 1" ]
+                
+                html <| Html.div [] <| [ViewTab1.styling] ++ [Html.map GalleryMsg <|
+                    Gallery.view ViewTab1.imageConfig model.galleryTab1 [ ] ViewTab1.imageSlides]
+                    
             ]
 
-viewTab2 : Model -> Element msg
+
+viewTab2 : Model -> Element Msg
 viewTab2 model = 
     el [ centerX, centerY] 
         <|
@@ -266,7 +287,7 @@ viewTab2 model =
                     [ el [ Font.italic ] <| text "Tab 2" ]
             ]
 
-viewTab3 : Model -> Element msg
+viewTab3 : Model -> Element Msg
 viewTab3 model = 
     el [ centerX, centerY] 
         <|
@@ -277,7 +298,7 @@ viewTab3 model =
                     [ Font.size 48, Font.center ]
                     [ el [ Font.italic ] <| text "Tab 3" ]
             ]
-viewTab4 : Model -> Element msg
+viewTab4 : Model -> Element Msg
 viewTab4 model = 
     el [ centerX, centerY] 
         <|
@@ -288,7 +309,7 @@ viewTab4 model =
                     [ Font.size 48, Font.center ]
                     [ el [ Font.italic ] <| text "Tab 4" ]
             ]
-viewTab5 : Model -> Element msg
+viewTab5 : Model -> Element Msg
 viewTab5 model = 
     el [ centerX, centerY] 
         <|
@@ -299,7 +320,7 @@ viewTab5 model =
                     [ Font.size 48, Font.center ]
                     [ el [ Font.italic ] <| text "Tab 5" ]
             ]
-viewTab6 : Model -> Element msg
+viewTab6 : Model -> Element Msg
 viewTab6 model = 
     el [ centerX, centerY] 
         <|
@@ -310,7 +331,7 @@ viewTab6 model =
                     [ Font.size 48, Font.center ]
                     [ el [ Font.italic ] <| text "Tab 6" ]
             ]
-viewTab7 : Model -> Element msg
+viewTab7 : Model -> Element Msg
 viewTab7 model = 
     el [ centerX, centerY] 
         <|
