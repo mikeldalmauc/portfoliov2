@@ -4,14 +4,15 @@ import Gallery
 import Gallery.Image as Image
 import Html exposing (Html)
 import Base exposing (slideCustom)
+import Element exposing (..)
 
 imageConfig : Gallery.Config
 imageConfig =
     Gallery.config
-        { id = "image-gallery"
-        , transition = 500
-        , width = Gallery.vw 60
-        , height = Gallery.vh 50
+        { id = "image-gallery-tab1"
+        , transition = 400
+        , width = Gallery.px 100 
+        , height = Gallery.px 100
         }
 
 imageSlides : List ( String, Html Gallery.Msg )
@@ -20,17 +21,18 @@ imageSlides =
 
 images : List String
 images =
-    [ 
-      "assets/tab1/portrait-21-md.jpg"
-    , "assets/tab1/3-black-woman-md.jpg"
-    , "assets/tab1/portrait-12-md.jpg"
-    , "assets/tab1/portrait-13-md.jpg"
-    , "assets/tab1/portrait-14-md.jpg"
-    , "assets/tab1/portrait-19-md.jpg"
-    , "assets/tab1/portrait-20-md.jpg"
-    , "assets/tab1/velazquez-9-md.jpg"
-    , "assets/tab1/wall-afternoon-md.jpg"
-    ]
+    List.map (\x -> "assets/tab1/" ++ x)
+        [ 
+          "portrait-21-md.jpg"
+        , "3-black-woman-md.jpg"
+        , "portrait-12-md.jpg"
+        , "portrait-13-md.jpg"
+        , "portrait-14-md.jpg"
+        , "portrait-19-md.jpg"
+        , "portrait-20-md.jpg"
+        , "velazquez-9-md.jpg"
+        , "wall-afternoon-md.jpg"
+        ]
 
 styling : Html msg
 styling =
@@ -91,3 +93,6 @@ texts =
     , """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec et quam nec eros pellentesque ultrices at et mauris. Sed sed ultricies lacus. Vestibulum porta elit et odio bibendum tempor. Nullam scelerisque quam felis, vitae pulvinar tortor scelerisque at. Mauris efficitur sagittis elit, pretium dapibus justo volutpat ac. Phasellus maximus lorem sit amet felis vestibulum accumsan. Mauris porta commodo massa placerat facilisis. Nunc et metus felis. Nulla scelerisque pretium elementum. Mauris pharetra eleifend erat et fermentum. Nulla eget sem consectetur, posuere felis sagittis, dictum metus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nunc feugiat et lorem feugiat gravida. Morbi elementum, eros at imperdiet eleifend, enim leo vestibulum nisi, et convallis lectus leo eu ipsum. Nam faucibus est sit amet accumsan luctus."""
     , """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec et quam nec eros pellentesque ultrices at et mauris. Sed sed ultricies lacus. Vestibulum porta elit et odio bibendum tempor. Nullam scelerisque quam felis, vitae pulvinar tortor scelerisque at. Mauris efficitur sagittis elit, pretium dapibus justo volutpat ac. Phasellus maximus lorem sit amet felis vestibulum accumsan. Mauris porta commodo massa placerat facilisis. Nunc et metus felis. Nulla scelerisque pretium elementum. Mauris pharetra eleifend erat et fermentum. Nulla eget sem consectetur, posuere felis sagittis, dictum metus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nunc feugiat et lorem feugiat gravida. Morbi elementum, eros at imperdiet eleifend, enim leo vestibulum nisi, et convallis lectus leo eu ipsum. Nam faucibus est sit amet accumsan luctus."""
     ]
+
+goldenRatio : Float
+goldenRatio = 1.61803398875

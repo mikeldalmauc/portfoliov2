@@ -28,6 +28,7 @@ type alias Model =
     { tab : Int
     , tabState : TabState
     , device : Device
+    , dimensions : Flags
     , wheelModel : WheelModel
     , galleryTab1 : Gallery.State
     , gesture : Swipe.Gesture
@@ -52,7 +53,7 @@ type Msg =
     | Swipe Swipe.Event
     | SwipeEnd Swipe.Event
     | UserMovedSlider Int
-    | DeviceClassified Device
+    | DeviceClassified Flags
     | GalleryMsg Gallery.Msg
     | Head
     | NoOp
@@ -62,6 +63,7 @@ init flags =
     ({    tab = 0
         , tabState = Loaded
         , device = Element.classifyDevice flags
+        , dimensions = flags
         , wheelModel = initWheelModel
         , gesture = Swipe.blanco
         , galleryTab1 = Gallery.init (List.length ViewTab1.images)
@@ -107,8 +109,8 @@ update msg model =
         UserMovedSlider v ->
             ({ model | tab = (v // 10) }, Cmd.none)
 
-        DeviceClassified device ->
-            ( { model | device = device } , Cmd.none)
+        DeviceClassified flags ->
+            ( { model | device = (Element.classifyDevice flags), dimensions = flags } , Cmd.none)
 
         GalleryMsg galleryMsg ->
             ({ model | galleryTab1 = Gallery.update galleryMsg model.galleryTab1 }, Cmd.none)
@@ -121,7 +123,36 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    let
+    let 
+        (deviceClass, deviceOrientation) = 
+            case model.device of
+                { class, orientation} -> (class, orientation)
+    in
+        case deviceClass of
+            Phone ->
+                bigDesktopLayout model
+            Tablet ->
+                bigDesktopLayout model
+            Desktop ->
+                bigDesktopLayout model
+            BigDesktop ->
+                bigDesktopLayout model
+    -- Html.div 
+        -- [ Swipe.onStart Swipe
+        -- , Swipe.onMove Swipe
+        -- , Swipe.onEndWithOptions 
+        --     { stopPropagation = True
+        --     , preventDefault = False
+        --     } 
+        --     SwipeEnd
+        -- ]
+        -- [ bigDesktopLayout model ]
+
+
+bigDesktopLayout : Model -> Html Msg
+bigDesktopLayout model = 
+    let 
+        -- Surrounding sections name, about link and mailing link
         name = el (brandFontAttrs ++ [ width fill, height <| fillPortion 1, centerX, Font.color <| gray50, mouseOver [Font.color <| highlight]  ]) 
             <| paragraph [ Font.center, centerY, Font.size 20, padding 40, onClick Head, pointer] [ text "Mikel Dalmau" ]
 
@@ -132,37 +163,31 @@ view model =
                 { url = partnerMailto
                 , label = text "mikeldalmauc@gmail.com"}
             ]
+            
+        -- Slider definition
         slider = if model.tab > 0 then 
                     el [width <| fillPortion 3, height fill, onRight <| tabsSlider model.tab ] none
                 else
                     el [width <| fillPortion 3, height fill] none
-    in
-        Html.div 
-            [ Swipe.onStart Swipe
-            , Swipe.onMove Swipe
-            , Swipe.onEndWithOptions 
-                { stopPropagation = True
-                , preventDefault = False
-                } 
-                SwipeEnd
+    in 
+        layout
+            [ width fill, height fill, Background.color black08
+                , behindContent <| infoDebug model -- TODO hide maybe
             ]
-            [ layout
-                [ width fill, height fill, Background.color black08
-                    , behindContent <| infoDebug model -- TODO hide maybe
-                ] 
-                <|  column
-                    [ height fill, width fill]
-                    [ name
-                    , row
-                        [ height <| fillPortion 18, width fill, spaceEvenly]
-                        [  menuL
-                        , el [width <| fillPortion 3, height fill] none
-                        , viewTab model
-                        , slider
-                        , menuR]
-                    , el [height <| fillPortion 1] none
-                    ]
-            ]
+            <|  column
+                [ height fill, width fill]
+                [ name
+                , row
+                    [ height <| fillPortion 18, width fill, spaceEvenly]
+                    [  menuL
+                    , el [width <| fillPortion 3, height fill] none
+                    , viewTab model
+                    , slider
+                    , menuR]
+                , el [height <| fillPortion 1] none
+                ]
+
+
 
 infoDebug : Model -> Element msg
 infoDebug model =
@@ -172,6 +197,7 @@ infoDebug model =
         , text <| "wheel Delta X: " ++ fromFloat model.wheelModel.deltaX
         , text <| "tab: " ++ fromInt model.tab
         , text <| "device: " ++ Debug.toString model.device
+        , text <| "dimensions: " ++ Debug.toString model.dimensions
         , text <| "galleryTab1: " ++ Debug.toString model.galleryTab1
         , text <| "gesture: " ++ Debug.toString model.gesture
         ]
@@ -235,6 +261,7 @@ tabsSlider actual =
 viewTab0 : Model -> Element Msg 
 viewTab0 model = 
     let
+        
         arrow = 
             el [height fill, centerX, padding 45]
             <| image [width <| px 17
@@ -369,7 +396,7 @@ subscriptions model =
             )
         , onResize 
             (\width height ->
-                DeviceClassified (Element.classifyDevice { width = width, height = height }))
+                DeviceClassified { width = width, height = height })
         ]
 
 main : Program Flags Model Msg
