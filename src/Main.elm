@@ -294,7 +294,7 @@ viewTab1 model =
             [
                 
                 html <| Html.div [] <| [ViewTab1.styling] ++ [Html.map GalleryMsg <|
-                    Gallery.view ViewTab1.imageConfig model.galleryTab1 [ Gallery.Arrows  ] ViewTab1.imageSlides]
+                    Gallery.view (ViewTab1.imageConfig 900 600) model.galleryTab1 [ Gallery.Arrows  ] ViewTab1.imageSlides]
                     
             ]
 

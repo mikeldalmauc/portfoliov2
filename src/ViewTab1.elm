@@ -6,13 +6,13 @@ import Html exposing (Html)
 import Base exposing (slideCustom)
 import Element exposing (..)
 
-imageConfig : Gallery.Config
-imageConfig =
+imageConfig : Float -> Float -> Gallery.Config
+imageConfig w h =
     Gallery.config
         { id = "image-gallery-tab1"
         , transition = 400
-        , width = Gallery.px 100 
-        , height = Gallery.px 100
+        , width = Gallery.px w 
+        , height = Gallery.px h
         }
 
 imageSlides : List ( String, Html Gallery.Msg )
@@ -93,6 +93,3 @@ texts =
     , """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec et quam nec eros pellentesque ultrices at et mauris. Sed sed ultricies lacus. Vestibulum porta elit et odio bibendum tempor. Nullam scelerisque quam felis, vitae pulvinar tortor scelerisque at. Mauris efficitur sagittis elit, pretium dapibus justo volutpat ac. Phasellus maximus lorem sit amet felis vestibulum accumsan. Mauris porta commodo massa placerat facilisis. Nunc et metus felis. Nulla scelerisque pretium elementum. Mauris pharetra eleifend erat et fermentum. Nulla eget sem consectetur, posuere felis sagittis, dictum metus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nunc feugiat et lorem feugiat gravida. Morbi elementum, eros at imperdiet eleifend, enim leo vestibulum nisi, et convallis lectus leo eu ipsum. Nam faucibus est sit amet accumsan luctus."""
     , """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec et quam nec eros pellentesque ultrices at et mauris. Sed sed ultricies lacus. Vestibulum porta elit et odio bibendum tempor. Nullam scelerisque quam felis, vitae pulvinar tortor scelerisque at. Mauris efficitur sagittis elit, pretium dapibus justo volutpat ac. Phasellus maximus lorem sit amet felis vestibulum accumsan. Mauris porta commodo massa placerat facilisis. Nunc et metus felis. Nulla scelerisque pretium elementum. Mauris pharetra eleifend erat et fermentum. Nulla eget sem consectetur, posuere felis sagittis, dictum metus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nunc feugiat et lorem feugiat gravida. Morbi elementum, eros at imperdiet eleifend, enim leo vestibulum nisi, et convallis lectus leo eu ipsum. Nam faucibus est sit amet accumsan luctus."""
     ]
-
-goldenRatio : Float
-goldenRatio = 1.61803398875

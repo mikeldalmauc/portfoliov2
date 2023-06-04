@@ -5,8 +5,6 @@ const browserSync = require('browser-sync').create();
 const sourcemaps = require('gulp-sourcemaps');
 const sharpResponsive = require("gulp-sharp-responsive");
 const rename = require("gulp-rename");
-const replace = require('gulp-replace');
-const cssnano = require('cssnano');
 const fs = require('fs')
 
 
@@ -14,13 +12,44 @@ const htmlFiles = 'src/html/**/*.html';
 const elmFiles = 'src/*.elm';
 const imageFiles = 'src/data/gallery/*.jpg';
 const assets = 'assets/**';
-// const galleryConfig = JSON.parse(fs.readFileSync('src/data/galleryImages.json')).data;
+
+const galleryConfig = 'src/data/galleryImages.json';
+const galleryConfigData = JSON.parse(fs.readFileSync(galleryConfig)).data;
+
 
 browserSync.init({
     server: {
         baseDir: "./build",
     }
 });
+
+function imageOptimizerTask(){
+
+    const BREAKPOINTS = galleryConfigData.breakpoints; 
+
+    const bps = BREAKPOINTS.map(bp => [Math.round(bp.size*16), "-"+bp.name]);
+    
+    // creates an array of [[1, "-xs"], [2, "-sm"], ... ] (obviously the values are 576/div etc)
+
+    let formatOptions = {quality: galleryConfigData.quality};
+    
+    return src(imageFiles)
+        .pipe(rename(function (path) {
+            path.dirname += "/" + path.basename;
+        }))
+        .pipe(sharpResponsive({
+            formats: galleryConfigData.formats.map(format => {
+                if("jpg" === format)
+                    formatOptions = {quality: galleryConfigData.quality, progressive:true};
+                else
+                    formatOptions = {quality: galleryConfigData.quality};
+
+                return bps.map(([width, suffix]) => ({ width, format: format, rename: { suffix }, formatOptions}));
+            }
+            ).flatMap(f => f)
+        }))
+        .pipe(dest('build/assets/gallery'));
+}
 
 
 function elmTask() {
@@ -57,7 +86,7 @@ function watchTask() {
 
 // Export everything to run when you run 'gulp'
 module.exports = {
-    // imageOptimizerTask,
+    imageOptimizerTask,
     default: series(
         parallel(elmTask, assetsTask, htmlTask),
         watchTask

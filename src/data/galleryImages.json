@@ -1,0 +1,323 @@
+{
+    "data": {
+      "quality": 50,
+      "formats": [
+        "avif",
+        "webp",
+        "jpeg"
+      ],
+      "breakpoints": [
+      {
+        "name": "sm",
+        "size": "48"
+      },
+      {
+        "name": "md",
+        "size": "65"
+      }
+      ],
+      "images": [
+        {
+            "name": "afrodita"
+          , "title": "Afrodita"
+          , "type": "digital"
+          , "software": ["Photoshop"]
+          , "ig": ""
+        },
+        {
+            "name": "afternoongate"
+          , "title": "afternoongate"
+          , "type": "digital"
+          , "software": ["Photoshop"]
+          , "ig": "https://www.instagram.com/p/CmNXafuqDTd/?utm_source=ig_web_copy_link"
+        },
+        {
+          "name": "batboy",
+          "title": "bat boy",
+          "type" : "other",
+          "software": ["ink"],
+          "ig":""
+        },
+        {
+          "name": "caballas",
+          "title": "caballas",
+          "type": "watercolor",
+          "software": "watercolor",
+          "ig": ""
+        },
+        {
+          "name": "anadearmas-7",
+          "title": "Ana de armas, bladerruner",
+          "type":"watercolor",
+          "software": ["watercolor"],
+          "ig":""
+        },
+        {
+          "name": "portrait-20",
+          "title": "Angel fallen",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "chica_10",
+          "title": "chica",
+          "type":"digital",
+          "software":["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "portrait-21",
+          "title": "malenia",
+          "type":"digital",
+          "software":["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "portrait-12",
+          "title": "model",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "portrait-13",
+          "title": "hat girl",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "portrait-14",
+          "title": "tattoed stylized",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "cargogirl",
+          "title": "cargo girl",
+          "type":"other",
+          "software": ["ink"],
+          "ig":""
+        },
+        {
+          "name": "portrait-19",
+          "title": "ribbon",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "bondrew",
+          "title": "bondrew made in abyss",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "portrait-22",
+          "title": "pipe smoke",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "portrait-23",
+          "title": "ufc",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "room",
+          "title": "room",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "squid-16",
+          "title": "squid game",
+          "type":"watercolor",
+          "software": ["watercolor"],
+          "ig":""
+        },
+        {
+          "name": "tombrider-18",
+          "title": "Alicia Vikander en Tomb Rider",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "top15-372Agosto",
+          "title": "quick poses",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "velazquez-9",
+          "title": "velazquez tyrion lannister",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "catsword",
+          "title": "catsword",
+          "type": "other",
+          "software": ["ink"],
+          "ig": ""
+        },
+        {
+          "name": "donatello",
+          "title": "donatello",
+          "type": "digital",
+          "software":["z-brush", "photoshop"],
+          "ig": ""
+        },
+        {
+          "name": "granadasbodeg",
+          "title": "bodegon con granadas",
+          "type": "other",
+          "software": ["ink"],
+          "ig":""
+        },
+        {
+          "name": "hottea",
+          "title": "hottea",
+          "type": "other",
+          "software": ["ink", "markers"],
+          "ig":""
+        },
+        {
+          "name": "wall3am",
+          "title": "wall 3 am",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "wall12am",
+          "title": "wall midday",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "2-korean-woman",
+          "title": "korean woman",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "99black-woman",
+          "title": "african woman",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "4takeshi",
+          "title": "chunkin express",
+          "type":"watercolor",
+          "software": ["watercolor"],
+          "ig":""
+        },
+        {
+          "name": "6-nexus6",
+          "title": "nexus 6, blade runner",
+          "type":"watercolor",
+          "software": ["watercolor"],
+          "ig":""
+        },
+        {
+          "name": "inktober-ees",
+          "title": "fire fighters",
+          "type":"other",
+          "software": ["ink"],
+          "ig":""
+        },
+        {
+          "name": "bro",
+          "title": "bro",
+          "type":"digital",
+          "software": ["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "liz",
+          "title": "liz",
+          "type": "digital",
+          "software":["blender", "photoshop"],
+          "ig": ""
+        },
+        {
+          "name": "myeveninggate",
+          "title": "evening gate",
+          "type":"digital",
+          "software":["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "nightgate",
+          "title": "night gate",
+          "type":"digital",
+          "software":["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "perspectivegate",
+          "title": "perspective gate",
+          "type":"digital",
+          "software":["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "portraiteweird",
+          "title": "portrait imagination",
+          "type":"digital",
+          "software":["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "pulpero",
+          "title": "pulpero",
+          "type":"digital",
+          "software":["photoshop"],
+          "ig":""
+        },
+        {
+          "name": "sardines",
+          "title": "sardinas",
+          "type":"watercolor",
+          "software":["watercolor"],
+          "ig":""
+        },
+        {
+          "name": "topper",
+          "title": "topper",
+          "type":"other",
+          "software": ["ink"],
+          "ig":""
+        },
+        {
+          "name": "tunafish",
+          "title": "tuna fish",
+          "type": "watercolor",
+          "software": ["watercolor"],
+          "ig":""
+        },
+        {
+          "name": "1-fallenAngels",
+          "title": "Fallen angels",
+          "type":"digital",
+          "software":["photoshop"],
+          "ig":""
+        }
+      ]
+    }
+  }

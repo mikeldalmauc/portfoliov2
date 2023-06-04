@@ -88,3 +88,7 @@ gray80 = rgb  0.8 0.8 0.8
 
 black08 : Color
 black08 = rgb 0.09 0.09 0.09 
+
+
+goldenRatio : Float
+goldenRatio = 1.61803398875
