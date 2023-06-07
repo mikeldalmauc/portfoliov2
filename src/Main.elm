@@ -148,6 +148,20 @@ view model =
         -- ]
         -- [ bigDesktopLayout model ]
 
+        {-
+              if shortSide < 600 then
+            Phone
+
+        else if longSide <= 1200 then
+            Tablet
+
+        else if longSide > 1200 && longSide <= 1920 then
+            Desktop
+
+        else
+            BigDesktop
+        -}
+
 
 bigDesktopLayout : Model -> Html Msg
 bigDesktopLayout model = 
@@ -166,21 +180,26 @@ bigDesktopLayout model =
             
         -- Slider definition
         slider = if model.tab > 0 then 
-                    el [width <| fillPortion 3, height fill, onRight <| tabsSlider model.tab ] none
+                    el [width <| fillPortion 2, height fill, onRight <| tabsSlider model.tab ] none
                 else
-                    el [width <| fillPortion 3, height fill] none
+                    el [width <| fillPortion 2, height fill] none
     in 
         layout
             [ width fill, height fill, Background.color black08
-                , behindContent <| infoDebug model -- TODO hide maybe
+                -- , behindContent <| infoDebug model -- TODO hide maybe
+                -- , Element.explain Debug.todo
             ]
             <|  column
-                [ height fill, width fill]
+                [ height fill, width fill
+                                -- , Element.explain Debug.todo
+                ]
                 [ name
                 , row
-                    [ height <| fillPortion 18, width fill, spaceEvenly]
+                    [ height <| fillPortion 18, width fill, spaceEvenly
+                    -- , Element.explain Debug.todo
+                    ]
                     [  menuL
-                    , el [width <| fillPortion 3, height fill] none
+                    , el [width <| fillPortion 2, height fill] none
                     , viewTab model
                     , slider
                     , menuR]
@@ -211,9 +230,9 @@ viewTab : Model -> Element Msg
 viewTab model =
     case (head <| drop model.tab tabs ) of
         Just tab ->
-            el [width (fillPortion 12), height (fillPortion 1)] <| tab model
+            el [width (fillPortion 14), height (fillPortion 1)] <| tab model
         Nothing ->
-            el [width (fillPortion 12), height (fillPortion 1)] <| viewTab1 model
+            el [width (fillPortion 14), height (fillPortion 1)] <| viewTab1 model
 
 nextTab : Int -> Int
 nextTab actual  =   
@@ -287,16 +306,19 @@ viewTab0 model =
 
 viewTab1 : Model -> Element Msg
 viewTab1 model = 
-    el [ centerX, centerY] 
-        <|
-            column
-            [ width fill, height fill, Font.color <| rgb 255 255 255]
-            [
-                
-                html <| Html.div [] <| [ViewTab1.styling] ++ [Html.map GalleryMsg <|
-                    Gallery.view (ViewTab1.imageConfig 900 600) model.galleryTab1 [ Gallery.Arrows  ] ViewTab1.imageSlides]
+    let
+        imageConfig = ViewTab1.imageConfig (toFloat model.dimensions.width * 0.5) (toFloat model.dimensions.height * 0.7)
+    in
+        el [ centerX, centerY] 
+            <|
+                column
+                [ width fill, height fill, Font.color <| rgb 255 255 255]
+                [
                     
-            ]
+                    html <| Html.div [] <| [ViewTab1.styling] ++ [Html.map GalleryMsg <|
+                        Gallery.view imageConfig model.galleryTab1 [ Gallery.Arrows  ] ViewTab1.imageSlides]
+                        
+                ]
 
 
 viewTab2 : Model -> Element Msg

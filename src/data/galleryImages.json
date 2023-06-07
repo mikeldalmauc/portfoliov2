@@ -1,6 +1,6 @@
 {
     "data": {
-      "quality": 50,
+      "quality": 70,
       "formats": [
         "avif",
         "webp",
@@ -8,12 +8,8 @@
       ],
       "breakpoints": [
       {
-        "name": "sm",
-        "size": "48"
-      },
-      {
-        "name": "md",
-        "size": "65"
+        "name": "or",
+        "size": "1618"
       }
       ],
       "images": [

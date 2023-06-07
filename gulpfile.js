@@ -11,6 +11,8 @@ const fs = require('fs')
 const htmlFiles = 'src/html/**/*.html';
 const elmFiles = 'src/*.elm';
 const imageFiles = 'src/data/gallery/*.jpg';
+const tabImageFiles = 'src/data/tab1/*.jpg';
+
 const assets = 'assets/**';
 
 const galleryConfig = 'src/data/galleryImages.json';
@@ -27,7 +29,7 @@ function imageOptimizerTask(){
 
     const BREAKPOINTS = galleryConfigData.breakpoints; 
 
-    const bps = BREAKPOINTS.map(bp => [Math.round(bp.size*16), "-"+bp.name]);
+    const bps = BREAKPOINTS.map(bp => [Math.round(bp.size), "-"+bp.name]);
     
     // creates an array of [[1, "-xs"], [2, "-sm"], ... ] (obviously the values are 576/div etc)
 
@@ -51,6 +53,34 @@ function imageOptimizerTask(){
         .pipe(dest('build/assets/gallery'));
 }
 
+
+function tabImageOptimizerTask(){
+
+    const BREAKPOINTS = galleryConfigData.breakpoints; 
+
+    const bps = BREAKPOINTS.map(bp => [Math.round(bp.size), "-"+bp.name]);
+    
+    // creates an array of [[1, "-xs"], [2, "-sm"], ... ] (obviously the values are 576/div etc)
+
+    let formatOptions = {quality: galleryConfigData.quality};
+    
+    return src(tabImageFiles)
+        .pipe(rename(function (path) {
+            path.dirname += "/" + path.basename;
+        }))
+        .pipe(sharpResponsive({
+            formats: galleryConfigData.formats.map(format => {
+                if("jpg" === format)
+                    formatOptions = {quality: galleryConfigData.quality, progressive:true};
+                else
+                    formatOptions = {quality: galleryConfigData.quality};
+
+                return bps.map(([width, suffix]) => ({ width, format: format, rename: { suffix }, formatOptions}));
+            }
+            ).flatMap(f => f)
+        }))
+        .pipe(dest('build/assets/tab1'));
+}
 
 function elmTask() {
     return src('.')
@@ -87,6 +117,7 @@ function watchTask() {
 // Export everything to run when you run 'gulp'
 module.exports = {
     imageOptimizerTask,
+    tabImageOptimizerTask,
     default: series(
         parallel(elmTask, assetsTask, htmlTask),
         watchTask

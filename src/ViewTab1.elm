@@ -5,6 +5,7 @@ import Gallery.Image as Image
 import Html exposing (Html)
 import Base exposing (slideCustom)
 import Element exposing (..)
+import Base exposing (goldenRatio)
 
 imageConfig : Float -> Float -> Gallery.Config
 imageConfig w h =
@@ -19,19 +20,20 @@ imageSlides : List ( String, Html Gallery.Msg )
 imageSlides =
     List.map (\x -> ( x, slideCustom [] x Image.Contain )) images
 
+
 images : List String
 images =
-    List.map (\x -> "assets/tab1/" ++ x)
+    List.map (\x -> "assets/tab1/" ++ x ++ "/" ++ x)
         [ 
-          "portrait-21-md.jpg"
-        , "3-black-woman-md.jpg"
-        , "portrait-12-md.jpg"
-        , "portrait-13-md.jpg"
-        , "portrait-14-md.jpg"
-        , "portrait-19-md.jpg"
-        , "portrait-20-md.jpg"
-        , "velazquez-9-md.jpg"
-        , "wall-afternoon-md.jpg"
+          "portrait-21"
+        , "3-black-woman"
+        , "portrait-12"
+        , "portrait-13"
+        , "portrait-14"
+        , "fallen-angel"
+        , "lazo"
+        , "velazquez-9"
+        , "afternoon-wall"
         ]
 
 styling : Html msg
@@ -74,8 +76,8 @@ textConfig =
     Gallery.config
         { id = "text-gallery"
         , transition = 500
-        , width = Gallery.px 600
-        , height = Gallery.px 400
+        , width = Gallery.px 1100
+        , height = Gallery.px (1100 * goldenRatio)
         }
 
 textSlides : List ( String, Html Gallery.Msg )

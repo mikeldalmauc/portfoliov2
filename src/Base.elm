@@ -8,12 +8,46 @@ import Gallery.Image exposing (..)
 import Html
 import Html.Attributes as Attrs
 
+
+
+-- srcset="example-320.jpg 320w, example-640.avif 640w, example-1024.webp 1024w, 
+-- example-1280.jpg 1280w, example-1920.avif 1920w, example-2560.webp 2560w">
+srcSet : Url -> String
+srcSet image =
+    List.map (\suffix -> image ++ suffix) (crossProduct ["or"] ["avif", "webp", "jpg"])
+        |> String.join ", "
+    
+
+crossProduct : List String -> List String -> List String
+crossProduct sizes formats =
+    List.concatMap (\size -> List.map (\format -> "-" ++ size ++ "." ++ format ++ " " ++ (sizeWidth size)) formats) sizes
+
+sizeWidth : String -> String
+sizeWidth size =
+    case size of 
+        "or" ->
+            "2560w"
+        "lg" ->
+            "1920w"
+        "md" ->
+            "1280w"
+        "sm" ->
+            "1024w"
+        "xs" ->
+            "640w"
+        "xxs" ->
+            "320w"
+        _ ->
+            "1280w"
+
 slideCustom : List (Html.Attribute msg) -> Url -> Size -> Html.Html msg
 slideCustom attrs url size =
     Html.img
-        ([ Attrs.src url
+        ([ Attrs.src (url ++ "-or.jpg")
          , Attrs.style "object-fit" (toObjectFit size)
          , Attrs.class "elm-gallery-image"
+         , Attrs.attribute "srcset" <| srcSet url
+        , Attrs.attribute "sizes" <| "100vw"
          ]
             ++ attrs
         )
