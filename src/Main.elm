@@ -190,7 +190,7 @@ bigDesktopLayout model =
     in 
         layout
             [ width fill, height fill, Background.color black08
-                -- , behindContent <| infoDebug model -- TODO hide maybe
+                , behindContent <| infoDebug model -- TODO hide maybe
                 -- , Element.explain Debug.todo
             ]
             <|  column

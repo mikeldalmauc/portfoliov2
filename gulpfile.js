@@ -10,12 +10,12 @@ const fs = require('fs')
 
 const htmlFiles = 'src/html/**/*.html';
 const elmFiles = 'src/*.elm';
-const imageFiles = 'src/data/gallery/*.jpg';
-const tabImageFiles = 'src/data/tab1/*.jpg';
+const imageFiles = 'assets/content/gallery/*.jpg';
+const tabImageFiles = 'assets/content/tab1/*.jpg';
 
-const assets = 'assets/**';
+const assets = 'assets/meta/**';
 
-const galleryConfig = 'src/data/galleryImages.json';
+const galleryConfig = 'assets/content/galleryImages.json';
 const galleryConfigData = JSON.parse(fs.readFileSync(galleryConfig)).data;
 
 

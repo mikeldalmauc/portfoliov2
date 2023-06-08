@@ -10,6 +10,14 @@
       {
         "name": "or",
         "size": "1618"
+      },
+      {
+        "name": "lg",
+        "size": "1200"
+      },
+      {
+        "name": "md",
+        "size": "800"
       }
       ],
       "images": [
