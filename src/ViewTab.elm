@@ -1,4 +1,4 @@
-module ViewTab1 exposing (..)
+module ViewTab exposing (..)
 
 import Gallery
 import Gallery.Image as Image
@@ -9,10 +9,10 @@ import Base exposing (goldenRatio)
 import Tuple exposing (first)
 import Html.Attributes as Attrs
 
+type alias Texts = List (String, String)
 
-
-imageSlides : List ( String, Html Gallery.Msg )
-imageSlides =
+imageSlides : List String -> List ( String, Html Gallery.Msg )
+imageSlides  images =
     List.map (\image -> (image, slideCustom [] image Image.Contain )) images
 
 
@@ -47,8 +47,8 @@ textConfig w h =
         , height = Gallery.px h
         }
 
-textSlides : List ( String, Html Gallery.Msg )
-textSlides =
+textSlides : Texts ->  List ( String, Html Gallery.Msg )
+textSlides texts =
     List.map (\pair -> ( first pair, textSlide pair)) texts
 
 
@@ -59,8 +59,8 @@ textSlide (title, subtitle) =
             [ Attrs.attribute "style" "font-size:40px; letter-spacing: 1.2px; font-family: 'Montserrat', sans-serif;word-spacing: 1.2px; font-variant: normal;"
             ] [ Html.text subtitle ] ]
 
-images : List String
-images =
+imagesTab1 : List String
+imagesTab1 =
     List.map (\image -> "assets/tab1/" ++ image ++ "/" ++ image)
         [ 
           "portrait-21"
@@ -74,8 +74,8 @@ images =
         , "afternoon-wall"
         ]
 
-texts : List (String, String)
-texts =
+textsTab1 : Texts
+textsTab1 =
     [ 
       ("Malenia,\nBlade of\nMiquella", "Fanart from Dark Souls")
     , ("3-black-woman", "")

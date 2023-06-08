@@ -21,7 +21,7 @@ import String exposing (right)
 import Gallery
 import Gallery.Image as Image
 import Platform.Cmd as Cmd
-import ViewTab1
+import ViewTab
 
 type alias Model =
 
@@ -67,8 +67,8 @@ init flags =
         , dimensions = flags
         , wheelModel = initWheelModel
         , gesture = Swipe.blanco
-        , galleryTab1 = Gallery.init (List.length ViewTab1.images)
-        , textGalleryTab1 = Gallery.init (List.length ViewTab1.images)
+        , galleryTab1 = Gallery.init (List.length ViewTab.imagesTab1)
+        , textGalleryTab1 = Gallery.init (List.length ViewTab.textsTab1)
     }
     , Cmd.none
     )
@@ -134,13 +134,13 @@ view model =
     in
         case deviceClass of
             Phone ->
-                bigDesktopLayout model
+                desktopLayout model
             Tablet ->
-                bigDesktopLayout model
+                desktopLayout model
             Desktop ->
-                bigDesktopLayout model
+                desktopLayout model
             BigDesktop ->
-                bigDesktopLayout model
+                desktopLayout model
     -- Html.div 
         -- [ Swipe.onStart Swipe
         -- , Swipe.onMove Swipe
@@ -167,10 +167,21 @@ view model =
         -}
 
 
-bigDesktopLayout : Model -> Html Msg
-bigDesktopLayout model = 
+desktopLayout : Model -> Html Msg
+desktopLayout model = 
     let 
         -- Surrounding sections name, about link and mailing link
+        (deviceClass, deviceOrientation) = 
+            case model.device of
+                { class, orientation} -> (class, orientation)
+        
+        layoutConf=
+            case deviceClass of
+                BigDesktop ->
+                    {sliderWidthFactor = 2}
+                _ ->
+                    {sliderWidthFactor = 1}
+
         name = el (brandFontAttrs ++ [ width fill, height <| fillPortion 1, centerX, Font.color <| gray50, mouseOver [Font.color <| highlight]  ]) 
             <| paragraph [ Font.center, centerY, Font.size 20, padding 40, onClick Head, pointer] [ text "Mikel Dalmau" ]
 
@@ -184,9 +195,9 @@ bigDesktopLayout model =
             
         -- Slider definition
         slider = if model.tab > 0 then 
-                    el [width <| fillPortion 2, height fill, onRight <| tabsSlider model.tab ] none
+                    el [width <| fillPortion layoutConf.sliderWidthFactor, height fill, onRight <| tabsSlider model.tab ] none
                 else
-                    el [width <| fillPortion 2, height fill] none
+                    el [width <| fillPortion layoutConf.sliderWidthFactor, height fill] none
     in 
         layout
             [ width fill, height fill, Background.color black08
@@ -310,24 +321,41 @@ viewTab0 model =
 
 viewTab1 : Model -> Element Msg
 viewTab1 model = 
+   viewSliderTab ViewTab.imagesTab1 ViewTab.textsTab1 model
+
+
+viewSliderTab : List String -> ViewTab.Texts -> Model -> Element Msg
+viewSliderTab images texts model = 
+
     let
-        imageConfig = ViewTab1.imageConfig (toFloat model.dimensions.width * 0.5) (toFloat model.dimensions.height * 0.7)
-        textConfig = ViewTab1.textConfig (toFloat model.dimensions.width * 0.5) (toFloat model.dimensions.height * 0.7)
+        (deviceClass, deviceOrientation) = 
+            case model.device of
+                { class, orientation} -> (class, orientation)
+
+        sliderTabConf=
+            case deviceClass of
+                BigDesktop ->
+                    {fontSize=120, sliderWidthFactor=0.5, sliderHeightFactor=0.7, leftDisplacement=200.0, upDisplacement=100.0}
+                _ ->
+                    {fontSize=70, sliderWidthFactor=0.65, sliderHeightFactor=0.76, leftDisplacement=100.0, upDisplacement=50.0}
+
+        imageConfig = ViewTab.imageConfig (toFloat model.dimensions.width * sliderTabConf.sliderWidthFactor) (toFloat model.dimensions.height * sliderTabConf.sliderHeightFactor)
+        textConfig = ViewTab.textConfig (toFloat model.dimensions.width * sliderTabConf.sliderWidthFactor) (toFloat model.dimensions.height * sliderTabConf.sliderHeightFactor)
         
         imageGallery =  html <| Html.div [] <| [Html.map GalleryMsg <|
-                        Gallery.view imageConfig model.galleryTab1 [Gallery.Arrows] ViewTab1.imageSlides]
+                        Gallery.view imageConfig model.galleryTab1 [Gallery.Arrows] (ViewTab.imageSlides images)]
         textGallery = el (brandFontAttrs ++ [
               width fill
             , height fill
-            , Font.size 120
-            , moveLeft 200.0
-            , moveUp 100.0
+            , Font.size sliderTabConf.fontSize
+            , moveLeft sliderTabConf.leftDisplacement
+            , moveUp sliderTabConf.upDisplacement
             , Font.alignLeft
             , htmlAttribute (Attrs.attribute "style" "pointer-events: none;")
 
             ]) 
             <| html 
-                <| Html.div [] [Html.map GalleryMsg <| Gallery.viewText textConfig model.textGalleryTab1 [] ViewTab1.textSlides]
+                <| Html.div [] [Html.map GalleryMsg <| Gallery.viewText textConfig model.textGalleryTab1 [] (ViewTab.textSlides texts) ]
     in
         el [ centerX, centerY] 
             <|
