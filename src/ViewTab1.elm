@@ -6,6 +6,28 @@ import Html exposing (Html)
 import Base exposing (slideCustom)
 import Element exposing (..)
 import Base exposing (goldenRatio)
+import Tuple exposing (first)
+import Html.Attributes as Attrs
+
+
+
+imageSlides : List ( String, Html Gallery.Msg )
+imageSlides =
+    List.map (\image -> (image, slideCustom [] image Image.Contain )) images
+
+
+
+styling : Html msg
+styling =
+    Html.node "style"
+        []
+        [ Html.text
+            """
+               .elm-gallery-text-itemcontainer p{
+                    font-size:60px;
+               }    
+            """
+        ]
 
 imageConfig : Float -> Float -> Gallery.Config
 imageConfig w h =
@@ -16,14 +38,30 @@ imageConfig w h =
         , height = Gallery.px h
         }
 
-imageSlides : List ( String, Html Gallery.Msg )
-imageSlides =
-    List.map (\x -> ( x, slideCustom [] x Image.Contain )) images
+textConfig :  Float -> Float -> Gallery.Config
+textConfig w h =
+    Gallery.config
+        { id = "text-gallery"
+        , transition = 400
+         , width = Gallery.px w 
+        , height = Gallery.px h
+        }
 
+textSlides : List ( String, Html Gallery.Msg )
+textSlides =
+    List.map (\pair -> ( first pair, textSlide pair)) texts
+
+
+textSlide : (String, String) -> Html Gallery.Msg
+textSlide (title, subtitle) =
+    Html.article [] [ Html.h3 [Attrs.attribute "style" "margin-bottom: 10px;"] [ Html.text title]
+        , Html.p 
+            [ Attrs.attribute "style" "font-size:40px; letter-spacing: 1.2px; font-family: 'Montserrat', sans-serif;word-spacing: 1.2px; font-variant: normal;"
+            ] [ Html.text subtitle ] ]
 
 images : List String
 images =
-    List.map (\x -> "assets/tab1/" ++ x ++ "/" ++ x)
+    List.map (\image -> "assets/tab1/" ++ image ++ "/" ++ image)
         [ 
           "portrait-21"
         , "3-black-woman"
@@ -36,62 +74,16 @@ images =
         , "afternoon-wall"
         ]
 
-styling : Html msg
-styling =
-    Html.node "style"
-        []
-        [ Html.text
-            """
-                main {
-                    font-family: Helvetica, arial, sans-serif;
-                }
-
-                a {
-                    color: white;
-                }
-
-                #image-gallery {
-                    margin: 5rem auto;
-                }
-
-                #text-gallery {
-                    margin: 5rem auto;
-                    background-color: #eee;
-                }
-
-                article {
-                    padding: 2rem;
-                }
-
-                h4 {
-                    color: grey;
-                    margin: 1rem 0 0;
-                    font-weight: 500;
-                }
-            """
-        ]
-
-textConfig : Gallery.Config
-textConfig =
-    Gallery.config
-        { id = "text-gallery"
-        , transition = 500
-        , width = Gallery.px 1100
-        , height = Gallery.px (1100 * goldenRatio)
-        }
-
-textSlides : List ( String, Html Gallery.Msg )
-textSlides =
-    List.map (\x -> ( x, textSlide x )) texts
-
-
-textSlide : String -> Html Gallery.Msg
-textSlide slide =
-    Html.article [] [ Html.h3 [] [ Html.text "Title" ], Html.p [] [ Html.text slide ] ]
-    
-texts : List String
+texts : List (String, String)
 texts =
-    [ """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec et quam nec eros pellentesque ultrices at et mauris. Sed sed ultricies lacus. Vestibulum porta elit et odio bibendum tempor. Nullam scelerisque quam felis, vitae pulvinar tortor scelerisque at. Mauris efficitur sagittis elit, pretium dapibus justo volutpat ac. Phasellus maximus lorem sit amet felis vestibulum accumsan. Mauris porta commodo massa placerat facilisis. Nunc et metus felis. Nulla scelerisque pretium elementum. Mauris pharetra eleifend erat et fermentum. Nulla eget sem consectetur, posuere felis sagittis, dictum metus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nunc feugiat et lorem feugiat gravida. Morbi elementum, eros at imperdiet eleifend, enim leo vestibulum nisi, et convallis lectus leo eu ipsum. Nam faucibus est sit amet accumsan luctus."""
-    , """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec et quam nec eros pellentesque ultrices at et mauris. Sed sed ultricies lacus. Vestibulum porta elit et odio bibendum tempor. Nullam scelerisque quam felis, vitae pulvinar tortor scelerisque at. Mauris efficitur sagittis elit, pretium dapibus justo volutpat ac. Phasellus maximus lorem sit amet felis vestibulum accumsan. Mauris porta commodo massa placerat facilisis. Nunc et metus felis. Nulla scelerisque pretium elementum. Mauris pharetra eleifend erat et fermentum. Nulla eget sem consectetur, posuere felis sagittis, dictum metus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nunc feugiat et lorem feugiat gravida. Morbi elementum, eros at imperdiet eleifend, enim leo vestibulum nisi, et convallis lectus leo eu ipsum. Nam faucibus est sit amet accumsan luctus."""
-    , """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec et quam nec eros pellentesque ultrices at et mauris. Sed sed ultricies lacus. Vestibulum porta elit et odio bibendum tempor. Nullam scelerisque quam felis, vitae pulvinar tortor scelerisque at. Mauris efficitur sagittis elit, pretium dapibus justo volutpat ac. Phasellus maximus lorem sit amet felis vestibulum accumsan. Mauris porta commodo massa placerat facilisis. Nunc et metus felis. Nulla scelerisque pretium elementum. Mauris pharetra eleifend erat et fermentum. Nulla eget sem consectetur, posuere felis sagittis, dictum metus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nunc feugiat et lorem feugiat gravida. Morbi elementum, eros at imperdiet eleifend, enim leo vestibulum nisi, et convallis lectus leo eu ipsum. Nam faucibus est sit amet accumsan luctus."""
+    [ 
+      ("Malenia,\nBlade of\nMiquella", "Fanart from Dark Souls")
+    , ("3-black-woman", "")
+    , ("portrait-12", "")
+    , ("portrait-13", "")
+    , ("portrait-14", "")
+    , ("fallen-angel", "")
+    , ("lazo", "")
+    , ("velazquez-9", "")
+    , ("afternoon-wall", "")
     ]

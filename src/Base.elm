@@ -42,16 +42,24 @@ sizeWidth size =
 
 slideCustom : List (Html.Attribute msg) -> Url -> Size -> Html.Html msg
 slideCustom attrs url size =
+
     Html.img
         ([ Attrs.src (url ++ "-or.jpg")
-         , Attrs.style "object-fit" (toObjectFit size)
-         , Attrs.class "elm-gallery-image"
-         , Attrs.attribute "srcset" <| srcSet url
+        , Attrs.style "object-fit" (toObjectFit size)
+        , Attrs.class "elm-gallery-image"
+        , Attrs.attribute "srcset" <| srcSet url
         , Attrs.attribute "sizes" <| "100vw"
-         ]
+        ]
             ++ attrs
         )
-        []
+        [ Html.div 
+            [ Attrs.attribute "position" "absolute"
+            , Attrs.attribute "pointer-events" "none"
+            , Attrs.attribute "font-family" "EB Garamond, serif"
+            , Attrs.attribute "font-weight" "400"
+            , Attrs.attribute "font-size" "67"
+            ] [Html.text "hello"]
+        ]
 
 toObjectFit : Size -> String
 toObjectFit size =
@@ -62,24 +70,17 @@ toObjectFit size =
         Contain ->
             "contain"
 
-brandFontAttrs : List (Attribute msg)
-brandFontAttrs =
-    [brandFont, Font.letterSpacing 3, Font.wordSpacing 1.4]
-
-brandFont : Attribute msg
-brandFont = Font.family
-            [ Font.external
-                { name = "EB Garamond"
-                , url = "https://fonts.googleapis.com/css2?family=EB+Garamond:wght@800&display=swap"
-                }
-            , Font.serif
-            ]
-
 partnerMailto : String
 partnerMailto =
     mailto "mikeldalmauc@gmail.co"
         |> subject "Hello Mikel"
         |> Mailto.toString
+
+
+
+brandFontAttrs : List (Attribute msg)
+brandFontAttrs =
+    [brandFont, Font.letterSpacing 3, Font.wordSpacing 1.4]
 
 baseFontAttrs : List (Attribute msg)
 baseFontAttrs =
@@ -91,6 +92,15 @@ secondaryFontAttrs =
     [baseFont400, Font.letterSpacing 1.2, Font.wordSpacing 1.2]
 
 
+brandFont : Attribute msg
+brandFont = Font.family
+            [ Font.external
+                { name = "EB Garamond"
+                , url = "https://fonts.googleapis.com/css2?family=EB+Garamond:wght@800&display=swap"
+                }
+            , Font.serif
+            ]
+
 baseFont100 : Attribute msg
 baseFont100 = Font.family
             [ Font.external
@@ -99,6 +109,7 @@ baseFont100 = Font.family
                 }
             , Font.sansSerif
             ]
+
 
 baseFont400 : Attribute msg
 baseFont400 = Font.family

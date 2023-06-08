@@ -16,7 +16,7 @@ import List exposing (take, head, drop, length)
 import Base exposing (..)
 import Element.Events exposing (onClick)
 import Swipe
-import Html.Attributes exposing (align)
+import Html.Attributes as Attrs exposing (align)
 import String exposing (right)
 import Gallery
 import Gallery.Image as Image
@@ -31,6 +31,7 @@ type alias Model =
     , dimensions : Flags
     , wheelModel : WheelModel
     , galleryTab1 : Gallery.State
+    , textGalleryTab1 : Gallery.State
     , gesture : Swipe.Gesture
     }
 
@@ -67,6 +68,7 @@ init flags =
         , wheelModel = initWheelModel
         , gesture = Swipe.blanco
         , galleryTab1 = Gallery.init (List.length ViewTab1.images)
+        , textGalleryTab1 = Gallery.init (List.length ViewTab1.images)
     }
     , Cmd.none
     )
@@ -113,7 +115,9 @@ update msg model =
             ( { model | device = (Element.classifyDevice flags), dimensions = flags } , Cmd.none)
 
         GalleryMsg galleryMsg ->
-            ({ model | galleryTab1 = Gallery.update galleryMsg model.galleryTab1 }, Cmd.none)
+            ({ model | galleryTab1 = Gallery.update galleryMsg model.galleryTab1,
+                       textGalleryTab1 = Gallery.update galleryMsg model.textGalleryTab1
+            }, Cmd.none)
             
         Head -> 
             ( {model | tab = 0} , Cmd.none )
@@ -308,16 +312,31 @@ viewTab1 : Model -> Element Msg
 viewTab1 model = 
     let
         imageConfig = ViewTab1.imageConfig (toFloat model.dimensions.width * 0.5) (toFloat model.dimensions.height * 0.7)
+        textConfig = ViewTab1.textConfig (toFloat model.dimensions.width * 0.5) (toFloat model.dimensions.height * 0.7)
+        
+        imageGallery =  html <| Html.div [] <| [Html.map GalleryMsg <|
+                        Gallery.view imageConfig model.galleryTab1 [Gallery.Arrows] ViewTab1.imageSlides]
+        textGallery = el (brandFontAttrs ++ [
+              width fill
+            , height fill
+            , Font.size 120
+            , moveLeft 200.0
+            , moveUp 100.0
+            , Font.alignLeft
+            , htmlAttribute (Attrs.attribute "style" "pointer-events: none;")
+
+            ]) 
+            <| html 
+                <| Html.div [] [Html.map GalleryMsg <| Gallery.viewText textConfig model.textGalleryTab1 [] ViewTab1.textSlides]
     in
         el [ centerX, centerY] 
             <|
-                column
-                [ width fill, height fill, Font.color <| rgb 255 255 255]
+                row
+                [ width fill, height fill, Font.color <| rgb 255 255 255
+                , behindContent imageGallery
+                ]
                 [
-                    
-                    html <| Html.div [] <| [ViewTab1.styling] ++ [Html.map GalleryMsg <|
-                        Gallery.view imageConfig model.galleryTab1 [ Gallery.Arrows  ] ViewTab1.imageSlides]
-                        
+                   textGallery
                 ]
 
 
