@@ -77,7 +77,7 @@ imagesTab1 =
         , "lazo"
         , "velazquez-9"
         , "afternoon-wall"
-        , "collage-digital-painting"
+        , "collage-digital-paintings"
         ]
 
 textsTab1 : Texts
@@ -97,31 +97,21 @@ textsTab1 =
 
 imagesTab2 : List String
 imagesTab2 =
-    List.map (\image -> "assets/tab1/" ++ image ++ "/" ++ image)
+    List.map (\image -> "assets/tab2/" ++ image ++ "/" ++ image)
         [ 
-          "velazquez-9"
-        , "3-black-woman"
-        , "portrait-13"
-        , "portrait-21"
-        , "portrait-12"
-        , "portrait-14"
-        , "lazo"
-        , "collage-digital-painting"
-        , "afternoon-wall"
-        , "fallen-angel"
+          "ana-de-armas"
+        , "calamar"
+        , "carnival-row"
+        , "pescados"
+        , "ink-sketches"
         ]
 
 textsTab2 : Texts
 textsTab2 =
   [ 
-      ("Malenia,\nBlade of\nMiquella", "Fanart from Dark Souls")
-    , ("Woman on\npark", "Digital portrait")
-    , ("Ona\nMorgan", "Digital portrait")
-    , ("Spring\nOutdoors", "Digital portrait")
-    , ("Urban\nPortrait", "Stylized Digital portrait")
-    , ("Fallen\nAngel", "Digital painting")
-    , ("Lazo", "Digital painting")
-    , ("Tyrion\nLannister +\nVelazquez", "Master study and fanart")
-    , ("City\nwall", "Digital painting")
-    , ("", "Bondrew from Made in Abyss\nAlicia Vikander on Tomb Raider\nMMA Fighter\nMichelle Reis on Fallen Angels")
+      ("Ana de Armas\nBalde Runner", "Watercolor portrait")
+    , ("Jung Ho-yeon\nSquid Game", "Watercolor portrait")
+    , ("Cara\nDelevingne\nCarnival Row", "Watercolor portrait")
+    , ("Fish", "Watercolor")
+    , ("Sketches", "Ink sketches")
     ]

@@ -38,8 +38,9 @@ The gulp task will run the following command to build the Elm code.
 
 Generate the images with the command
 
-```gulp tabImageOptimizerTask```
+```gulp tabImageOptimizerTask --tab 1```
 
+ 
 Define the desired configuration at galleryImages.json as shown:
 
 <img src="readme-imgs/image-config.png"  width="20%" height="30%">
