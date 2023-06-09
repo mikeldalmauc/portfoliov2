@@ -22,16 +22,21 @@ import Gallery
 import Gallery.Image as Image
 import Platform.Cmd as Cmd
 import ViewTab
+import Element.Font exposing (shadow)
+import Random 
 
 type alias Model =
 
     { tab : Int
     , tabState : TabState
+    , justChangedTab : Bool
     , device : Device
     , dimensions : Flags
     , wheelModel : WheelModel
     , galleryTab1 : Gallery.State
     , textGalleryTab1 : Gallery.State
+    , galleryTab2 : Gallery.State
+    , textGalleryTab2 : Gallery.State
     , gesture : Swipe.Gesture
     }
 
@@ -56,6 +61,7 @@ type Msg =
     | UserMovedSlider Int
     | DeviceClassified Flags
     | GalleryMsg Gallery.Msg
+    | ToTab Int
     | Head
     | NoOp
 
@@ -63,12 +69,15 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     ({    tab = 0
         , tabState = Loaded
+        , justChangedTab = False
         , device = Element.classifyDevice flags
         , dimensions = flags
         , wheelModel = initWheelModel
         , gesture = Swipe.blanco
         , galleryTab1 = Gallery.init (List.length ViewTab.imagesTab1)
         , textGalleryTab1 = Gallery.init (List.length ViewTab.textsTab1)
+        , galleryTab2 = Gallery.init (List.length ViewTab.imagesTab2)
+        , textGalleryTab2 = Gallery.init (List.length ViewTab.textsTab2)
     }
     , Cmd.none
     )
@@ -77,52 +86,70 @@ initWheelModel : WheelModel
 initWheelModel = 
     { deltaX = 0, deltaY = 0 }
 
-
+-- This is a workaround  to issue a message becaouse i am unable to making it the correct way
+toTab : Int -> Cmd Msg
+toTab tab =
+    Random.generate ToTab (Random.constant tab) 
+    
+    
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of 
-        Wheel wheelModel ->
-            case model.tabState of
-                Loading -> 
-                    ( model, Cmd.none )
-                Loaded -> 
-                    if  wheelModel.deltaY < 0.0 then                       
-                        ( {model | tab = previousTab model.tab, wheelModel = initWheelModel} , Cmd.none )
-                    else
-                        ( {model | tab = nextTab model.tab, wheelModel = initWheelModel} , Cmd.none )
-        
-        
-        Swipe touch ->
-            ({ model | gesture = Swipe.record touch model.gesture }, Cmd.none)
-                    
-        SwipeEnd touch ->
-            let
-                gesture = Swipe.record touch model.gesture
-                newTab = 
-                    if (Swipe.isUpSwipe 150.0 gesture) then
-                        nextTab model.tab
-                    else if (Swipe.isDownSwipe 150.0 gesture) then
-                        previousTab model.tab
-                    else
-                        model.tab
-            in
-                ({ model | gesture = Swipe.blanco, tab = newTab}, Cmd.none)
-
-        UserMovedSlider v ->
-            ({ model | tab = (v // 10) }, Cmd.none)
-
-        DeviceClassified flags ->
-            ( { model | device = (Element.classifyDevice flags), dimensions = flags } , Cmd.none)
-
-        GalleryMsg galleryMsg ->
-            ({ model | galleryTab1 = Gallery.update galleryMsg model.galleryTab1,
-                       textGalleryTab1 = Gallery.update galleryMsg model.textGalleryTab1
-            }, Cmd.none)
+update msg modelPrev =
+    let
+        model = {modelPrev | justChangedTab = False}
+    in
+        case msg of 
+            Wheel wheelModel ->
+                case model.tabState of
+                    Loading -> 
+                        ( model, Cmd.none )
+                    Loaded -> 
+                        if  wheelModel.deltaY < 0.0 then                       
+                            ( {model |  wheelModel = initWheelModel} , Cmd.batch [toTab <| previousTab model.tab])
+                        else
+                            ( {model | wheelModel = initWheelModel} , Cmd.batch [toTab <| nextTab model.tab] )
             
-        Head -> 
-            ( {model | tab = 0} , Cmd.none )
-        NoOp ->
-            ( model, Cmd.none )
+            ToTab tab ->
+                ( {model | tab = tab, justChangedTab = True} , Cmd.none )
+                
+            Swipe touch ->
+                ({ model | gesture = Swipe.record touch model.gesture }, Cmd.none)
+                        
+            SwipeEnd touch ->
+                let
+                    gesture = Swipe.record touch model.gesture
+                    newTab = 
+                        if (Swipe.isUpSwipe 150.0 gesture) then
+                            nextTab model.tab
+                        else if (Swipe.isDownSwipe 150.0 gesture) then
+                            previousTab model.tab
+                        else
+                            model.tab
+                in
+                    ({ model | gesture = Swipe.blanco}, Cmd.batch [toTab newTab])
+
+            UserMovedSlider v ->
+                (model, Cmd.batch [toTab (v // 10)])
+
+            DeviceClassified flags ->
+                ( { model | device = (Element.classifyDevice flags), dimensions = flags } , Cmd.none)
+
+            GalleryMsg galleryMsg ->
+                case model.tab of
+                    1 ->
+                        ({ model | galleryTab1 = Gallery.update galleryMsg model.galleryTab1,
+                        textGalleryTab1 = Gallery.update galleryMsg model.textGalleryTab1
+                        }, Cmd.none)
+                    2 ->
+                        ({ model | galleryTab2 = Gallery.update galleryMsg model.galleryTab2,
+                        textGalleryTab2 = Gallery.update galleryMsg model.textGalleryTab2
+                        }, Cmd.none)
+                    _ ->
+                        ( model, Cmd.none )
+
+            Head -> 
+                ( model , Cmd.batch [toTab 0] )
+            NoOp ->
+                ( model, Cmd.none )
 
 
 view : Model -> Html Msg
@@ -170,17 +197,8 @@ view model =
 desktopLayout : Model -> Html Msg
 desktopLayout model = 
     let 
-        -- Surrounding sections name, about link and mailing link
-        (deviceClass, deviceOrientation) = 
-            case model.device of
-                { class, orientation} -> (class, orientation)
         
-        layoutConf=
-            case deviceClass of
-                BigDesktop ->
-                    {sliderWidthFactor = 2}
-                _ ->
-                    {sliderWidthFactor = 1}
+        conf = layoutConf model.device
 
         name = el (brandFontAttrs ++ [ width fill, height <| fillPortion 1, centerX, Font.color <| gray50, mouseOver [Font.color <| highlight]  ]) 
             <| paragraph [ Font.center, centerY, Font.size 20, padding 40, onClick Head, pointer] [ text "Mikel Dalmau" ]
@@ -195,13 +213,13 @@ desktopLayout model =
             
         -- Slider definition
         slider = if model.tab > 0 then 
-                    el [width <| fillPortion layoutConf.sliderWidthFactor, height fill, onRight <| tabsSlider model.tab ] none
+                    el [width <| fillPortion conf.vSliderWidthFactor, height fill, onRight <| tabsSlider model.tab ] none
                 else
-                    el [width <| fillPortion layoutConf.sliderWidthFactor, height fill] none
+                    el [width <| fillPortion conf.vSliderWidthFactor, height fill] none
     in 
         layout
             [ width fill, height fill, Background.color black08
-                , behindContent <| infoDebug model -- TODO hide maybe
+                -- , behindContent <| infoDebug model -- TODO hide maybe
                 -- , Element.explain Debug.todo
             ]
             <|  column
@@ -321,41 +339,40 @@ viewTab0 model =
 
 viewTab1 : Model -> Element Msg
 viewTab1 model = 
-   viewSliderTab ViewTab.imagesTab1 ViewTab.textsTab1 model
+   viewSliderTab model.justChangedTab ViewTab.imagesTab1 ViewTab.textsTab1 model.dimensions model.device (model.galleryTab1, model.textGalleryTab1)
+
+viewTab2 : Model -> Element Msg
+viewTab2 model = 
+    viewSliderTab model.justChangedTab ViewTab.imagesTab2 ViewTab.textsTab2 model.dimensions model.device (model.galleryTab2, model.textGalleryTab2)
 
 
-viewSliderTab : List String -> ViewTab.Texts -> Model -> Element Msg
-viewSliderTab images texts model = 
+viewSliderTab : Bool -> List String -> ViewTab.Texts -> Flags -> Device -> (Gallery.State, Gallery.State) -> Element Msg
+viewSliderTab justChangedTab images texts dimensions device (imageGalleryState, textGalleryState) = 
 
     let
-        (deviceClass, deviceOrientation) = 
-            case model.device of
-                { class, orientation} -> (class, orientation)
+        conf  = layoutConf device
+        slidesTransitionTime = if justChangedTab then
+                            0
+                        else
+                            400
 
-        sliderTabConf=
-            case deviceClass of
-                BigDesktop ->
-                    {fontSize=120, sliderWidthFactor=0.5, sliderHeightFactor=0.7, leftDisplacement=200.0, upDisplacement=100.0}
-                _ ->
-                    {fontSize=70, sliderWidthFactor=0.65, sliderHeightFactor=0.76, leftDisplacement=100.0, upDisplacement=50.0}
-
-        imageConfig = ViewTab.imageConfig (toFloat model.dimensions.width * sliderTabConf.sliderWidthFactor) (toFloat model.dimensions.height * sliderTabConf.sliderHeightFactor)
-        textConfig = ViewTab.textConfig (toFloat model.dimensions.width * sliderTabConf.sliderWidthFactor) (toFloat model.dimensions.height * sliderTabConf.sliderHeightFactor)
+        imageConfig = ViewTab.imageConfig slidesTransitionTime (toFloat dimensions.width * conf.sliderWidthFactor) (toFloat dimensions.height * conf.sliderHeightFactor)
+        textConfig = ViewTab.textConfig slidesTransitionTime (toFloat dimensions.width * conf.sliderWidthFactor) (toFloat dimensions.height * conf.sliderHeightFactor)
         
         imageGallery =  html <| Html.div [] <| [Html.map GalleryMsg <|
-                        Gallery.view imageConfig model.galleryTab1 [Gallery.Arrows] (ViewTab.imageSlides images)]
+                        Gallery.view imageConfig imageGalleryState [Gallery.Arrows] (ViewTab.imageSlides images)]
         textGallery = el (brandFontAttrs ++ [
               width fill
             , height fill
-            , Font.size sliderTabConf.fontSize
-            , moveLeft sliderTabConf.leftDisplacement
-            , moveUp sliderTabConf.upDisplacement
+            , Font.size conf.fontSize
+            , moveLeft conf.leftDisplacement
+            , moveUp conf.upDisplacement
             , Font.alignLeft
             , htmlAttribute (Attrs.attribute "style" "pointer-events: none;")
-
+            , shadow {offset = (5, 5), blur = 5, color= rgba 0 0 0 0.5}
             ]) 
             <| html 
-                <| Html.div [] [Html.map GalleryMsg <| Gallery.viewText textConfig model.textGalleryTab1 [] (ViewTab.textSlides texts) ]
+                <| Html.div [] [Html.map GalleryMsg <| Gallery.viewText textConfig textGalleryState [] (ViewTab.textSlides device texts) ]
     in
         el [ centerX, centerY] 
             <|
@@ -366,19 +383,6 @@ viewSliderTab images texts model =
                 [
                    textGallery
                 ]
-
-
-viewTab2 : Model -> Element Msg
-viewTab2 model = 
-    el [ centerX, centerY] 
-        <|
-            column
-            [ width fill, height fill, Font.color <| rgb 255 255 255]
-            [
-                paragraph
-                    [ Font.size 48, Font.center ]
-                    [ el [ Font.italic ] <| text "Tab 2" ]
-            ]
 
 viewTab3 : Model -> Element Msg
 viewTab3 model = 

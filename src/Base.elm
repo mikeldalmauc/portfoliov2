@@ -1,6 +1,6 @@
 module Base exposing (..)
 
-import Element exposing (Attribute, rgb)
+import Element exposing (Attribute, rgb, Device, DeviceClass(..))
 import Element.Font as Font
 import Element exposing (Color)
 import Mailto exposing (mailto, subject)
@@ -39,6 +39,45 @@ sizeWidth size =
             "320w"
         _ ->
             "1280w"
+            
+type alias LayoutConf =                 
+    { fontSize : Int
+    , subtitleFontSize : Int
+    , sliderWidthFactor : Float
+    , sliderHeightFactor: Float
+    , leftDisplacement : Float
+    , upDisplacement : Float
+    , vSliderWidthFactor : Int
+    }
+
+layoutConf : Device -> LayoutConf
+layoutConf device =
+    let
+       (deviceClass, deviceOrientation) = 
+            case device of
+                { class, orientation} -> (class, orientation)
+        
+    in
+        case deviceClass of
+            BigDesktop ->
+                { fontSize=120
+                , subtitleFontSize = 40
+                , sliderWidthFactor=0.5
+                , sliderHeightFactor=0.7
+                , leftDisplacement=200.0
+                , upDisplacement=100.0
+                , vSliderWidthFactor = 2
+                }
+            _ ->
+                { fontSize=70
+                , subtitleFontSize = 20
+                , sliderWidthFactor=0.65
+                , sliderHeightFactor=0.76
+                , leftDisplacement=100.0
+                , upDisplacement=50.0
+                , vSliderWidthFactor = 1
+                }
+
 
 slideCustom : List (Html.Attribute msg) -> Url -> Size -> Html.Html msg
 slideCustom attrs url size =

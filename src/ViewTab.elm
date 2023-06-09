@@ -3,7 +3,7 @@ module ViewTab exposing (..)
 import Gallery
 import Gallery.Image as Image
 import Html exposing (Html)
-import Base exposing (slideCustom)
+import Base exposing (slideCustom, layoutConf)
 import Element exposing (..)
 import Base exposing (goldenRatio)
 import Tuple exposing (first)
@@ -29,35 +29,40 @@ styling =
             """
         ]
 
-imageConfig : Float -> Float -> Gallery.Config
-imageConfig w h =
+imageConfig : Int -> Float -> Float -> Gallery.Config
+imageConfig transition w h =
     Gallery.config
         { id = "image-gallery-tab1"
-        , transition = 400
+        , transition = transition
         , width = Gallery.px w 
         , height = Gallery.px h
         }
 
-textConfig :  Float -> Float -> Gallery.Config
-textConfig w h =
+textConfig : Int -> Float -> Float -> Gallery.Config
+textConfig transition w h =
     Gallery.config
         { id = "text-gallery"
-        , transition = 400
+        , transition = transition
          , width = Gallery.px w 
         , height = Gallery.px h
         }
 
-textSlides : Texts ->  List ( String, Html Gallery.Msg )
-textSlides texts =
-    List.map (\pair -> ( first pair, textSlide pair)) texts
+textSlides : Device -> Texts ->  List ( String, Html Gallery.Msg )
+textSlides device texts =
+    List.map (\pair -> ( first pair, textSlide device pair)) texts
 
 
-textSlide : (String, String) -> Html Gallery.Msg
-textSlide (title, subtitle) =
-    Html.article [] [ Html.h3 [Attrs.attribute "style" "margin-bottom: 10px;"] [ Html.text title]
-        , Html.p 
-            [ Attrs.attribute "style" "font-size:40px; letter-spacing: 1.2px; font-family: 'Montserrat', sans-serif;word-spacing: 1.2px; font-variant: normal;"
-            ] [ Html.text subtitle ] ]
+textSlide : Device -> (String, String) -> Html Gallery.Msg
+textSlide device (title, subtitle) =
+    let
+        conf = layoutConf device
+
+        subtitleFont = String.fromInt conf.subtitleFontSize ++ "px"
+    in
+        Html.article [] [ Html.h3 [Attrs.attribute "style" "margin-bottom: 10px;"] [ Html.text title]
+            , Html.p 
+                [ Attrs.attribute "style" <| "font-size:"++ subtitleFont ++"; letter-spacing: 1.2px; font-family: 'Montserrat', sans-serif;word-spacing: 1.2px; font-variant: normal;"
+                ] [ Html.text subtitle ] ]
 
 imagesTab1 : List String
 imagesTab1 =
@@ -72,18 +77,51 @@ imagesTab1 =
         , "lazo"
         , "velazquez-9"
         , "afternoon-wall"
+        , "collage-digital-painting"
         ]
 
 textsTab1 : Texts
 textsTab1 =
-    [ 
+  [ 
       ("Malenia,\nBlade of\nMiquella", "Fanart from Dark Souls")
-    , ("3-black-woman", "")
-    , ("portrait-12", "")
-    , ("portrait-13", "")
-    , ("portrait-14", "")
-    , ("fallen-angel", "")
-    , ("lazo", "")
-    , ("velazquez-9", "")
-    , ("afternoon-wall", "")
+    , ("Woman on\npark", "Digital portrait")
+    , ("Ona\nMorgan", "Digital portrait")
+    , ("Spring\nOutdoors", "Digital portrait")
+    , ("Urban\nPortrait", "Stylized Digital portrait")
+    , ("Fallen\nAngel", "Digital painting")
+    , ("Lazo", "Digital painting")
+    , ("Tyrion\nLannister +\nVelazquez", "Master study and fanart")
+    , ("City\nwall", "Digital painting")
+    , ("", "Bondrew from Made in Abyss\nAlicia Vikander on Tomb Raider\nMMA Fighter\nMichelle Reis on Fallen Angels")
+    ]
+
+imagesTab2 : List String
+imagesTab2 =
+    List.map (\image -> "assets/tab1/" ++ image ++ "/" ++ image)
+        [ 
+          "velazquez-9"
+        , "3-black-woman"
+        , "portrait-13"
+        , "portrait-21"
+        , "portrait-12"
+        , "portrait-14"
+        , "lazo"
+        , "collage-digital-painting"
+        , "afternoon-wall"
+        , "fallen-angel"
+        ]
+
+textsTab2 : Texts
+textsTab2 =
+  [ 
+      ("Malenia,\nBlade of\nMiquella", "Fanart from Dark Souls")
+    , ("Woman on\npark", "Digital portrait")
+    , ("Ona\nMorgan", "Digital portrait")
+    , ("Spring\nOutdoors", "Digital portrait")
+    , ("Urban\nPortrait", "Stylized Digital portrait")
+    , ("Fallen\nAngel", "Digital painting")
+    , ("Lazo", "Digital painting")
+    , ("Tyrion\nLannister +\nVelazquez", "Master study and fanart")
+    , ("City\nwall", "Digital painting")
+    , ("", "Bondrew from Made in Abyss\nAlicia Vikander on Tomb Raider\nMMA Fighter\nMichelle Reis on Fallen Angels")
     ]
