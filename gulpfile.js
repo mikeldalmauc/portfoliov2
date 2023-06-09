@@ -14,6 +14,7 @@ const imageFiles = 'assets/content/gallery/*.jpg';
 const tabImageFiles = 'assets/content/tab1/*.jpg';
 
 const assets = 'assets/meta/**';
+const playground = 'assets/content/playground/**';
 
 const galleryConfig = 'assets/content/galleryImages.json';
 const galleryConfigData = JSON.parse(fs.readFileSync(galleryConfig)).data;
@@ -110,6 +111,14 @@ function assetsTask(){
     .pipe(browserSync.stream());
 }
 
+// Gulp task to copy all build files of games to build directory
+function playgroundTasks(){
+    return src(playground)
+    .pipe(dest('build/playground')) // Put everything in the build directory
+    .pipe(browserSync.stream());
+}
+
+
 
 function watchTask() {
     // Watch for changes in any SCSS or JS files, and run the scssTask,
@@ -126,6 +135,7 @@ function watchTask() {
 module.exports = {
     imageOptimizerTask,
     tabImageOptimizerTask,
+    playgroundTasks,
     default: series(
         parallel(elmTask, assetsTask, htmlTask),
         watchTask

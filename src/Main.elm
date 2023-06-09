@@ -21,7 +21,7 @@ import String exposing (right)
 import Gallery
 import Gallery.Image as Image
 import Platform.Cmd as Cmd
-import ViewTab
+import ViewTab exposing (..)
 import Element.Font exposing (shadow)
 import Random 
 
@@ -33,11 +33,14 @@ type alias Model =
     , device : Device
     , dimensions : Flags
     , wheelModel : WheelModel
+    , gesture : Swipe.Gesture
+
     , galleryTab1 : Gallery.State
     , textGalleryTab1 : Gallery.State
     , galleryTab2 : Gallery.State
     , textGalleryTab2 : Gallery.State
-    , gesture : Swipe.Gesture
+    , galleryTab3 : Gallery.State
+    , textGalleryTab3 : Gallery.State
     }
 
 type alias WheelModel =
@@ -78,6 +81,8 @@ init flags =
         , textGalleryTab1 = Gallery.init (List.length ViewTab.textsTab1)
         , galleryTab2 = Gallery.init (List.length ViewTab.imagesTab2)
         , textGalleryTab2 = Gallery.init (List.length ViewTab.textsTab2)
+        , galleryTab3 = Gallery.init (List.length ViewTab.imagesTab3)
+        , textGalleryTab3 = Gallery.init (List.length ViewTab.textsTab3)
     }
     , Cmd.none
     )
@@ -142,6 +147,10 @@ update msg modelPrev =
                     2 ->
                         ({ model | galleryTab2 = Gallery.update galleryMsg model.galleryTab2,
                         textGalleryTab2 = Gallery.update galleryMsg model.textGalleryTab2
+                        }, Cmd.none)
+                    3 ->
+                        ({ model | galleryTab3 = Gallery.update galleryMsg model.galleryTab3,
+                        textGalleryTab3 = Gallery.update galleryMsg model.textGalleryTab3
                         }, Cmd.none)
                     _ ->
                         ( model, Cmd.none )
@@ -339,15 +348,21 @@ viewTab0 model =
 
 viewTab1 : Model -> Element Msg
 viewTab1 model = 
-   viewSliderTab model.justChangedTab ViewTab.imagesTab1 ViewTab.textsTab1 model.dimensions model.device (model.galleryTab1, model.textGalleryTab1)
+   viewSliderTab model.justChangedTab none ViewTab.imagesTab1 ViewTab.textsTab1 model.dimensions model.device (model.galleryTab1, model.textGalleryTab1)
+
 
 viewTab2 : Model -> Element Msg
 viewTab2 model = 
-    viewSliderTab model.justChangedTab ViewTab.imagesTab2 ViewTab.textsTab2 model.dimensions model.device (model.galleryTab2, model.textGalleryTab2)
+    viewSliderTab model.justChangedTab none ViewTab.imagesTab2 ViewTab.textsTab2 model.dimensions model.device (model.galleryTab2, model.textGalleryTab2)
 
 
-viewSliderTab : Bool -> List String -> ViewTab.Texts -> Flags -> Device -> (Gallery.State, Gallery.State) -> Element Msg
-viewSliderTab justChangedTab images texts dimensions device (imageGalleryState, textGalleryState) = 
+viewTab3 : Model -> Element Msg
+viewTab3 model = 
+    viewSliderTab model.justChangedTab (linkToPage <| Gallery.current model.galleryTab3) ViewTab.imagesTab3 ViewTab.textsTab3 model.dimensions model.device (model.galleryTab3, model.textGalleryTab3)
+
+
+viewSliderTab : Bool -> Element Msg -> List String -> ViewTab.Texts -> Flags -> Device -> (Gallery.State, Gallery.State) -> Element Msg
+viewSliderTab justChangedTab linkToPage images texts dimensions device (imageGalleryState, textGalleryState) = 
 
     let
         conf  = layoutConf device
@@ -359,7 +374,7 @@ viewSliderTab justChangedTab images texts dimensions device (imageGalleryState, 
         imageConfig = ViewTab.imageConfig slidesTransitionTime (toFloat dimensions.width * conf.sliderWidthFactor) (toFloat dimensions.height * conf.sliderHeightFactor)
         textConfig = ViewTab.textConfig slidesTransitionTime (toFloat dimensions.width * conf.sliderWidthFactor) (toFloat dimensions.height * conf.sliderHeightFactor)
         
-        imageGallery =  html <| Html.div [] <| [Html.map GalleryMsg <|
+        imageGallery =  el [inFront linkToPage] <| html <| Html.div [] <| [Html.map GalleryMsg <|
                         Gallery.view imageConfig imageGalleryState [Gallery.Arrows] (ViewTab.imageSlides images)]
         textGallery = el (brandFontAttrs ++ [
               width fill
@@ -384,17 +399,7 @@ viewSliderTab justChangedTab images texts dimensions device (imageGalleryState, 
                    textGallery
                 ]
 
-viewTab3 : Model -> Element Msg
-viewTab3 model = 
-    el [ centerX, centerY] 
-        <|
-            column
-            [ width fill, height fill, Font.color <| rgb 255 255 255]
-            [
-                paragraph
-                    [ Font.size 48, Font.center ]
-                    [ el [ Font.italic ] <| text "Tab 3" ]
-            ]
+
 viewTab4 : Model -> Element Msg
 viewTab4 model = 
     el [ centerX, centerY] 

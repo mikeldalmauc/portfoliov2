@@ -173,6 +173,11 @@ gray80 = rgb  0.8 0.8 0.8
 black08 : Color
 black08 = rgb 0.09 0.09 0.09 
 
+orange : Color
+orange = rgb 0.95 0.5 0.1
+
+lightOrange : Color
+lightOrange = rgb 0.95 0.7 0.5
 
 goldenRatio : Float
 goldenRatio = 1.61803398875
