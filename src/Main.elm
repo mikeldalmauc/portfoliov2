@@ -24,6 +24,10 @@ import Platform.Cmd as Cmd
 import ViewTab exposing (..)
 import Element.Font exposing (shadow)
 import Random 
+import Keyboard.Event exposing (KeyboardEvent, decodeKeyboardEvent)
+import Keyboard.Key as Key
+import Json.Decode as Json
+
 
 type alias Model =
 
@@ -62,10 +66,11 @@ type Msg =
     | Swipe Swipe.Event
     | SwipeEnd Swipe.Event
     | UserMovedSlider Int
-    | DeviceClassified Flags
-    | GalleryMsg Gallery.Msg
-    | ToTab Int
+    | HandleKeyboardEvent KeyboardEvent
     | Head
+    | ToTab Int
+    | GalleryMsg Gallery.Msg
+    | DeviceClassified Flags
     | NoOp
 
 init : Flags -> ( Model, Cmd Msg )
@@ -90,11 +95,6 @@ init flags =
 initWheelModel : WheelModel
 initWheelModel = 
     { deltaX = 0, deltaY = 0 }
-
--- This is a workaround  to issue a message becaouse i am unable to making it the correct way
-toTab : Int -> Cmd Msg
-toTab tab =
-    Random.generate ToTab (Random.constant tab) 
     
     
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -102,7 +102,33 @@ update msg modelPrev =
     let
         model = {modelPrev | justChangedTab = False}
     in
-        case msg of 
+        case msg of
+            {-
+                NAVIGATION messages
+            -} 
+            HandleKeyboardEvent event -> 
+                case event.keyCode of
+                    Key.Right ->  
+                        case (actualGallery model) of
+                            Just (imageGallery, textGallery) -> 
+                                (updateGallery (Gallery.next imageGallery, Gallery.next textGallery) model, Cmd.none)
+                            Nothing -> 
+                                ( model, Cmd.none )
+                    Key.Left ->  
+                        case (actualGallery model) of
+                            Just (imageGallery, textGallery) -> 
+                                (updateGallery (Gallery.previous imageGallery, Gallery.previous textGallery) model, Cmd.none)
+                            Nothing -> 
+                                ( model, Cmd.none )
+
+                    Key.Up -> 
+                        ( model , Cmd.batch [toTab <| previousTab model.tab])
+                    Key.Down ->  
+                        ( model , Cmd.batch [toTab <| nextTab model.tab] )
+                    _ -> 
+                        (model, Cmd.none)
+                                
+
             Wheel wheelModel ->
                 case model.tabState of
                     Loading -> 
@@ -139,26 +165,47 @@ update msg modelPrev =
                 ( { model | device = (Element.classifyDevice flags), dimensions = flags } , Cmd.none)
 
             GalleryMsg galleryMsg ->
-                case model.tab of
-                    1 ->
-                        ({ model | galleryTab1 = Gallery.update galleryMsg model.galleryTab1,
-                        textGalleryTab1 = Gallery.update galleryMsg model.textGalleryTab1
-                        }, Cmd.none)
-                    2 ->
-                        ({ model | galleryTab2 = Gallery.update galleryMsg model.galleryTab2,
-                        textGalleryTab2 = Gallery.update galleryMsg model.textGalleryTab2
-                        }, Cmd.none)
-                    3 ->
-                        ({ model | galleryTab3 = Gallery.update galleryMsg model.galleryTab3,
-                        textGalleryTab3 = Gallery.update galleryMsg model.textGalleryTab3
-                        }, Cmd.none)
-                    _ ->
+                case (actualGallery model) of
+                    Just (imageGallery, textGallery) -> 
+                        (updateGallery (Gallery.update galleryMsg imageGallery, Gallery.update galleryMsg textGallery) model, Cmd.none)
+                    Nothing -> 
                         ( model, Cmd.none )
 
             Head -> 
                 ( model , Cmd.batch [toTab 0] )
+
             NoOp ->
                 ( model, Cmd.none )
+
+actualGallery : Model -> Maybe (Gallery.State, Gallery.State)
+actualGallery model =  
+    case model.tab of
+        1 ->
+           Just (model.galleryTab1, model.textGalleryTab1)
+        2 ->
+           Just (model.galleryTab2, model.textGalleryTab2)
+        3 ->
+           Just (model.galleryTab3, model.textGalleryTab3)
+        _ ->
+            Nothing
+
+updateGallery : (Gallery.State, Gallery.State) -> Model -> Model
+updateGallery  (imageGallery, textGallery) model = 
+     case model.tab of
+        1 ->
+            { model | galleryTab1 = imageGallery, textGalleryTab1 = textGallery}
+        2 ->
+            { model | galleryTab2 = imageGallery, textGalleryTab2 = textGallery}
+        3 ->
+            { model | galleryTab3 = imageGallery, textGalleryTab3 = textGallery}
+        _ -> model
+
+            
+
+-- This is a workaround  to issue a message becaouse i am unable to making it the correct way
+toTab : Int -> Cmd Msg
+toTab tab =
+    Random.generate ToTab (Random.constant tab) 
 
 
 view : Model -> Html Msg
@@ -463,7 +510,8 @@ wheelDecoder =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ onWheel
+        [ onKeyDown (Json.map HandleKeyboardEvent decodeKeyboardEvent)
+        , onWheel
             (\val ->
                 case Decode.decodeValue wheelDecoder val of
                     Ok wheelModel ->
