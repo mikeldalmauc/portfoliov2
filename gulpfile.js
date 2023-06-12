@@ -6,12 +6,11 @@ const sourcemaps = require('gulp-sourcemaps');
 const sharpResponsive = require("gulp-sharp-responsive");
 const rename = require("gulp-rename");
 const fs = require('fs')
-var argv = require('yargs').argv;
+const argv = require('yargs').argv;
 
 const htmlFiles = 'src/html/**/*.html';
 const elmFiles = 'src/*.elm';
 const imageFiles = 'assets/content/gallery/*.jpg';
-const tabImageFiles = 'assets/content/tab1/*.jpg';
 
 const assets = 'assets/meta/**';
 const playground = 'assets/content/playground/**';
@@ -72,21 +71,21 @@ function tabImageOptimizerTask(){
         let formatOptions = {quality: galleryConfigData.quality};
     
         return src('assets/content/tab'+tab+'/*.jpg')
-        .pipe(rename(function (path) {
-            path.dirname += "/" + path.basename;
-        }))
-        .pipe(sharpResponsive({
-            formats: galleryConfigData.formats.map(format => {
-                if("jpg" === format)
-                formatOptions = {quality: galleryConfigData.quality, progressive:true};
-                else
-                    formatOptions = {quality: galleryConfigData.quality};
-                    
+            .pipe(rename(function (path) {
+                path.dirname += "/" + path.basename;
+            }))
+            .pipe(sharpResponsive({
+                formats: galleryConfigData.formats.map(format => {
+                    if("jpg" === format)
+                        formatOptions = {quality: galleryConfigData.quality, progressive:true};
+                    else
+                        formatOptions = {quality: galleryConfigData.quality};
+                        
                     return bps.map(([width, suffix]) => ({ width, format: format, rename: { suffix }, formatOptions}));
                 }
-            ).flatMap(f => f)
-        }))
-        .pipe(dest('build/assets/tab'+tab));
+                ).flatMap(f => f)
+            }))
+            .pipe(dest('build/assets/tab'+tab));
     }
 }
 
