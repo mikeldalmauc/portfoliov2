@@ -13,6 +13,7 @@ import Element.Background as Background
 import Element.Border as Border
 import Svg 
 import Svg.Attributes as SvgAttrs
+import SvgParser exposing (parse)
 
 type alias Texts = List (String, String)
 
@@ -128,6 +129,7 @@ imagesTab3 =
           "tetris"
         , "particles"
         , "buscaminas"
+        , "igfilters"
         ]
 
 textsTab3 : Texts
@@ -136,6 +138,7 @@ textsTab3 =
       ("Tetris\n", "Implementation of Tetris in Elm")
     , ("Elm Particles\n", "Implementations using\nElm particles library")
     , ("Minesweeper", "Full js implementation of\nclassic Minesweeper game")
+    , ("Instagram filters", "Filters created\nwith Spark AR Studio")
     ]
 
 -- TODO add code for normal desktp sizes
@@ -157,26 +160,48 @@ gitHubSvg =
         []
     ]
 
+instagramSvg : Html msg
+instagramSvg = 
+    let            
+        svga = case parse "assets/Instagram_logo_2016.svg" of
+            Err _ ->
+                Html.text "Error loading svg"
+            Ok svg ->
+                svg
+
+    in
+    Svg.svg [ SvgAttrs.viewBox "0 0 16 16", SvgAttrs.width "32", SvgAttrs.height "32" ]
+        [ svga ]
+
+sourceLabel : Html msg -> String -> Element msg
+sourceLabel icon label = 
+    row [spaceEvenly ] 
+        [
+        el [transparent True] <| text " "
+        , el [transparent True] <| text " "
+        , el [transparent True] <| text " "
+        , html icon
+        , text label
+        , el [transparent True] <| text " "
+        , el [transparent True] <| text " "
+        , el [transparent True] <| text " "
+        ]
+
+
 linkToPage : Device -> List ( String, Html Gallery.Msg )
 linkToPage  device = 
     let 
         conf = layoutConf device
         
-        sourcelabel = row [spaceEvenly ] [
-              el [transparent True] <| text " "
-            , el [transparent True] <| text " "
-            , el [transparent True] <| text " "
-            , html gitHubSvg
-            , text "Source"
-            , el [transparent True] <| text " "
-            , el [transparent True] <| text " "
-            , el [transparent True] <| text " "
-            ]
+        sourcelabel = sourceLabel gitHubSvg "Source" 
+
+        sourcelabelIG = sourceLabel instagramSvg "View on Instagram" 
 
         links = 
-            [ ({ url = "/playground/tetris/tetris.html", label = text "Live example"}, { url = "https://github.com/mikeldalmauc/tetris" , label = sourcelabel})
-            , ({ url = "/playground/particles/app.html", label = text "Live example"}, { url = "https://github.com/mikeldalmauc/elmparticles", label = sourcelabel})
-            , ({ url = "/playground/buscaminas/buscaminas.html", label = text "Live example"}, { url = "https://github.com/mikeldalmauc/buscaminas", label = sourcelabel})
+            [ ({ url = "/playground/tetris/tetris.html", label = text "Live example"}, { url = "https://github.com/mikeldalmauc/tetris" , label = sourcelabel}, False)
+            , ({ url = "/playground/particles/app.html", label = text "Live example"}, { url = "https://github.com/mikeldalmauc/elmparticles", label = sourcelabel}, False)
+            , ({ url = "/playground/buscaminas/buscaminas.html", label = text "Live example"}, { url = "https://github.com/mikeldalmauc/buscaminas", label = sourcelabel}, False)
+            , ({ url = "https://www.instagram.com/mikel_dalmau_art/", label = sourcelabelIG}, { url = "https://github.com/mikeldalmauc/buscaminas", label = none}, True)
             ]
 
         liveExampleAttrs = Base.secondaryFontAttrs ++ 
@@ -192,7 +217,7 @@ linkToPage  device =
                         , Font.underline
                         ]
     in 
-        List.indexedMap (\index (liveExample, sourceCode) ->
+        List.indexedMap (\index (liveExample, sourceCode, invisible) ->
              (String.fromInt <| index+1,
                 layoutWith {options = [noStaticStyleSheet]} [] <| column (Base.secondaryFontAttrs ++ [
                     centerY
@@ -209,7 +234,7 @@ linkToPage  device =
                     ]) 
                     <| [ paragraph liveExampleAttrs <| [ link [] liveExample ]
                         , el [transparent True] <| text " "
-                        , paragraph sourceAttrs <| [ link [] sourceCode ]
+                        , paragraph sourceAttrs <| [ link [transparent invisible] sourceCode ]
                         ])
         ) links
 
