@@ -275,18 +275,14 @@ desktopLayout model =
     in 
         layout
             [ width fill, height fill, Background.color black08
-                -- , behindContent <| infoDebug model -- TODO hide maybe
+                , behindContent <| infoDebug model -- TODO hide maybe
                 -- , Element.explain Debug.todo
             ]
             <|  column
-                [ height fill, width fill
-                                -- , Element.explain Debug.todo
-                ]
+                [ height fill, width fill]
                 [ name
                 , row
-                    [ height <| fillPortion 18, width fill, spaceEvenly
-                    -- , Element.explain Debug.todo
-                    ]
+                    [ height <| fillPortion 18, width fill, spaceEvenly]
                     [  menuL
                     , el [width <| fillPortion 2, height fill] none
                     , viewTab model
@@ -395,12 +391,12 @@ viewTab0 model =
 
 viewTab1 : Model -> Element Msg
 viewTab1 model = 
-   viewSliderTab model.justChangedTab none ViewTab.imagesTab1 ViewTab.textsTab1 model.dimensions model.device (model.galleryTab1, model.textGalleryTab1)
+   viewSliderTab model.justChangedTab  (\_ -> none) ViewTab.imagesTab1 ViewTab.textsTab1 model.dimensions model.device (model.galleryTab1, model.textGalleryTab1)
 
 
 viewTab2 : Model -> Element Msg
 viewTab2 model = 
-    viewSliderTab model.justChangedTab none ViewTab.imagesTab2 ViewTab.textsTab2 model.dimensions model.device (model.galleryTab2, model.textGalleryTab2)
+    viewSliderTab model.justChangedTab (\_ -> none) ViewTab.imagesTab2 ViewTab.textsTab2 model.dimensions model.device (model.galleryTab2, model.textGalleryTab2)
 
 
 viewTab3 : Model -> Element Msg
@@ -408,8 +404,8 @@ viewTab3 model =
     viewSliderTab model.justChangedTab (linkToPage <| Gallery.current model.galleryTab3) ViewTab.imagesTab3 ViewTab.textsTab3 model.dimensions model.device (model.galleryTab3, model.textGalleryTab3)
 
 
-viewSliderTab : Bool -> Element Msg -> List String -> ViewTab.Texts -> Flags -> Device -> (Gallery.State, Gallery.State) -> Element Msg
-viewSliderTab justChangedTab linkToPage images texts dimensions device (imageGalleryState, textGalleryState) = 
+viewSliderTab : Bool -> (Device -> Element Msg) -> List String -> ViewTab.Texts -> Flags -> Device -> (Gallery.State, Gallery.State) -> Element Msg
+viewSliderTab justChangedTab linksSection images texts dimensions device (imageGalleryState, textGalleryState) = 
 
     let
         conf  = layoutConf device
@@ -421,7 +417,7 @@ viewSliderTab justChangedTab linkToPage images texts dimensions device (imageGal
         imageConfig = ViewTab.imageConfig slidesTransitionTime (toFloat dimensions.width * conf.sliderWidthFactor) (toFloat dimensions.height * conf.sliderHeightFactor)
         textConfig = ViewTab.textConfig slidesTransitionTime (toFloat dimensions.width * conf.sliderWidthFactor) (toFloat dimensions.height * conf.sliderHeightFactor)
         
-        imageGallery =  el [inFront linkToPage] <| html <| Html.div [] <| [Html.map GalleryMsg <|
+        imageGallery =  el [inFront <| linksSection device] <| html <| Html.div [] <| [Html.map GalleryMsg <|
                         Gallery.view imageConfig imageGalleryState [Gallery.Arrows] (ViewTab.imageSlides images)]
         textGallery = el (brandFontAttrs ++ [
               width fill

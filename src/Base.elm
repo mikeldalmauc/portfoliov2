@@ -14,7 +14,7 @@ import Html.Attributes as Attrs
 -- example-1280.jpg 1280w, example-1920.avif 1920w, example-2560.webp 2560w">
 srcSet : Url -> String
 srcSet image =
-    List.map (\suffix -> image ++ suffix) (crossProduct ["or"] ["avif", "webp", "jpg"])
+    List.map (\suffix -> image ++ suffix) (crossProduct ["or", "lg", "md"] ["avif", "webp", "jpg"])
         |> String.join ", "
     
 
@@ -178,6 +178,9 @@ orange = rgb 0.95 0.5 0.1
 
 lightOrange : Color
 lightOrange = rgb 0.95 0.7 0.5
+
+ligthBlue : Color
+ligthBlue = rgb 0.5 0.7 0.95
 
 goldenRatio : Float
 goldenRatio = 1.61803398875
