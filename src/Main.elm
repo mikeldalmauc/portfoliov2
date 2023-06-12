@@ -39,12 +39,15 @@ type alias Model =
     , wheelModel : WheelModel
     , gesture : Swipe.Gesture
 
-    , galleryTab1 : Gallery.State
-    , textGalleryTab1 : Gallery.State
-    , galleryTab2 : Gallery.State
-    , textGalleryTab2 : Gallery.State
-    , galleryTab3 : Gallery.State
-    , textGalleryTab3 : Gallery.State
+    , galleryTab1 : GalleryState
+    , galleryTab2 : GalleryState
+    , galleryTab3 : GalleryState
+    }
+
+type alias GalleryState = 
+    { image: Gallery.State
+    , text: Gallery.State
+    , links: Gallery.State
     }
 
 type alias WheelModel =
@@ -82,12 +85,9 @@ init flags =
         , dimensions = flags
         , wheelModel = initWheelModel
         , gesture = Swipe.blanco
-        , galleryTab1 = Gallery.init (List.length ViewTab.imagesTab1)
-        , textGalleryTab1 = Gallery.init (List.length ViewTab.textsTab1)
-        , galleryTab2 = Gallery.init (List.length ViewTab.imagesTab2)
-        , textGalleryTab2 = Gallery.init (List.length ViewTab.textsTab2)
-        , galleryTab3 = Gallery.init (List.length ViewTab.imagesTab3)
-        , textGalleryTab3 = Gallery.init (List.length ViewTab.textsTab3)
+        , galleryTab1 = initGalleryState (List.length ViewTab.imagesTab1)
+        , galleryTab2 = initGalleryState (List.length ViewTab.imagesTab2)
+        , galleryTab3 = initGalleryState (List.length ViewTab.imagesTab3)
     }
     , Cmd.none
     )
@@ -110,14 +110,22 @@ update msg modelPrev =
                 case event.keyCode of
                     Key.Right ->  
                         case (actualGallery model) of
-                            Just (imageGallery, textGallery) -> 
-                                (updateGallery (Gallery.next imageGallery, Gallery.next textGallery) model, Cmd.none)
+                            Just galleryState -> 
+                                (updateGallery 
+                                    { image =Gallery.next galleryState.image
+                                    , links = Gallery.next galleryState.links
+                                    , text = Gallery.next galleryState.text} 
+                                    model, Cmd.none)
                             Nothing -> 
                                 ( model, Cmd.none )
                     Key.Left ->  
                         case (actualGallery model) of
-                            Just (imageGallery, textGallery) -> 
-                                (updateGallery (Gallery.previous imageGallery, Gallery.previous textGallery) model, Cmd.none)
+                            Just galleryState -> 
+                                (updateGallery
+                                { image =Gallery.previous galleryState.image
+                                , links = Gallery.previous galleryState.links
+                                , text = Gallery.previous galleryState.text} 
+                                 model, Cmd.none)
                             Nothing -> 
                                 ( model, Cmd.none )
 
@@ -166,8 +174,12 @@ update msg modelPrev =
 
             GalleryMsg galleryMsg ->
                 case (actualGallery model) of
-                    Just (imageGallery, textGallery) -> 
-                        (updateGallery (Gallery.update galleryMsg imageGallery, Gallery.update galleryMsg textGallery) model, Cmd.none)
+                    Just galleryState -> 
+                        (updateGallery
+                         { image =Gallery.update galleryMsg galleryState.image
+                        , links = Gallery.update galleryMsg  galleryState.links
+                        , text = Gallery.update galleryMsg galleryState.text}  
+                         model, Cmd.none)
                     Nothing -> 
                         ( model, Cmd.none )
 
@@ -177,27 +189,36 @@ update msg modelPrev =
             NoOp ->
                 ( model, Cmd.none )
 
-actualGallery : Model -> Maybe (Gallery.State, Gallery.State)
+
+initGalleryState : Int -> GalleryState
+initGalleryState length =  
+    { image = Gallery.init length
+    , text = Gallery.init length
+    , links = Gallery.init length
+    }
+
+
+actualGallery : Model -> Maybe GalleryState
 actualGallery model =  
     case model.tab of
         1 ->
-           Just (model.galleryTab1, model.textGalleryTab1)
+           Just model.galleryTab1
         2 ->
-           Just (model.galleryTab2, model.textGalleryTab2)
+           Just model.galleryTab2
         3 ->
-           Just (model.galleryTab3, model.textGalleryTab3)
+           Just model.galleryTab3
         _ ->
             Nothing
 
-updateGallery : (Gallery.State, Gallery.State) -> Model -> Model
-updateGallery  (imageGallery, textGallery) model = 
+updateGallery : GalleryState -> Model -> Model
+updateGallery  galleryState model = 
      case model.tab of
         1 ->
-            { model | galleryTab1 = imageGallery, textGalleryTab1 = textGallery}
+            { model | galleryTab1 = galleryState}
         2 ->
-            { model | galleryTab2 = imageGallery, textGalleryTab2 = textGallery}
+            { model | galleryTab2 = galleryState}
         3 ->
-            { model | galleryTab3 = imageGallery, textGalleryTab3 = textGallery}
+            { model | galleryTab3 = galleryState}
         _ -> model
 
             
@@ -391,21 +412,21 @@ viewTab0 model =
 
 viewTab1 : Model -> Element Msg
 viewTab1 model = 
-   viewSliderTab model.justChangedTab  (\_ -> none) ViewTab.imagesTab1 ViewTab.textsTab1 model.dimensions model.device (model.galleryTab1, model.textGalleryTab1)
+   viewSliderTab model.justChangedTab Nothing ViewTab.imagesTab1 ViewTab.textsTab1 model.dimensions model.device model.galleryTab1
 
 
 viewTab2 : Model -> Element Msg
 viewTab2 model = 
-    viewSliderTab model.justChangedTab (\_ -> none) ViewTab.imagesTab2 ViewTab.textsTab2 model.dimensions model.device (model.galleryTab2, model.textGalleryTab2)
+    viewSliderTab model.justChangedTab Nothing ViewTab.imagesTab2 ViewTab.textsTab2 model.dimensions model.device model.galleryTab2
 
 
 viewTab3 : Model -> Element Msg
 viewTab3 model = 
-    viewSliderTab model.justChangedTab (linkToPage <| Gallery.current model.galleryTab3) ViewTab.imagesTab3 ViewTab.textsTab3 model.dimensions model.device (model.galleryTab3, model.textGalleryTab3)
+    viewSliderTab model.justChangedTab (Just linkToPage) ViewTab.imagesTab3 ViewTab.textsTab3 model.dimensions model.device model.galleryTab3
 
 
-viewSliderTab : Bool -> (Device -> Element Msg) -> List String -> ViewTab.Texts -> Flags -> Device -> (Gallery.State, Gallery.State) -> Element Msg
-viewSliderTab justChangedTab linksSection images texts dimensions device (imageGalleryState, textGalleryState) = 
+viewSliderTab : Bool -> Maybe (Device -> List ( String, Html Gallery.Msg )) -> List String -> ViewTab.Texts -> Flags -> Device -> GalleryState -> Element Msg
+viewSliderTab justChangedTab maybeLinks images texts dimensions device galleryState = 
 
     let
         conf  = layoutConf device
@@ -416,9 +437,17 @@ viewSliderTab justChangedTab linksSection images texts dimensions device (imageG
 
         imageConfig = ViewTab.imageConfig slidesTransitionTime (toFloat dimensions.width * conf.sliderWidthFactor) (toFloat dimensions.height * conf.sliderHeightFactor)
         textConfig = ViewTab.textConfig slidesTransitionTime (toFloat dimensions.width * conf.sliderWidthFactor) (toFloat dimensions.height * conf.sliderHeightFactor)
+        linksGallery =  case maybeLinks of
+                            Just linksSectionView -> 
+                                el [transparent False] <| html <| Html.div [] <| [Html.map GalleryMsg <|
+                                    Gallery.view imageConfig galleryState.links [] <| linksSectionView device]
+                            Nothing -> 
+                                el [transparent True] <| html <| Html.div [] <| [Html.map GalleryMsg <|
+                                    Gallery.view imageConfig galleryState.links [] <| linkToPage device]
         
-        imageGallery =  el [inFront <| linksSection device] <| html <| Html.div [] <| [Html.map GalleryMsg <|
-                        Gallery.view imageConfig imageGalleryState [Gallery.Arrows] (ViewTab.imageSlides images)]
+        imageGallery =  el [inFront linksGallery] <| html <| Html.div [] <| [Html.map GalleryMsg <|
+                        Gallery.view imageConfig galleryState.image [Gallery.Arrows] (ViewTab.imageSlides images)]
+
         textGallery = el (brandFontAttrs ++ [
               width fill
             , height fill
@@ -430,7 +459,7 @@ viewSliderTab justChangedTab linksSection images texts dimensions device (imageG
             , shadow {offset = (5, 5), blur = 5, color= rgba 0 0 0 0.5}
             ]) 
             <| html 
-                <| Html.div [] [Html.map GalleryMsg <| Gallery.viewText textConfig textGalleryState [] (ViewTab.textSlides device texts) ]
+                <| Html.div [] [Html.map GalleryMsg <| Gallery.viewText textConfig galleryState.text [] (ViewTab.textSlides device texts) ]
     in
         el [ centerX, centerY] 
             <|

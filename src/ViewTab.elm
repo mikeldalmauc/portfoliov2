@@ -157,11 +157,11 @@ gitHubSvg =
         []
     ]
 
-
-linkToPage : Int -> Device -> Element msg
-linkToPage tab device = 
+linkToPage : Device -> List ( String, Html Gallery.Msg )
+linkToPage  device = 
     let 
         conf = layoutConf device
+        
         sourcelabel = row [spaceEvenly ] [
               el [transparent True] <| text " "
             , el [transparent True] <| text " "
@@ -173,35 +173,11 @@ linkToPage tab device =
             , el [transparent True] <| text " "
             ]
 
-        (liveExample, sourceCode) = case tab of 
-            0 ->  
-                ({ url = "/playground/tetris/tetris.html"
-                , label = text "Live example"
-                },
-                { url = "https://github.com/mikeldalmauc/tetris"
-                , label = sourcelabel
-                })
-            1 -> 
-                ({ url = "/playground/particles/app.html"
-                , label = text "Live example"
-                },
-                { url = "https://github.com/mikeldalmauc/elmparticles"
-                , label = sourcelabel
-                })
-            2 ->
-                ({ url = "/playground/buscaminas/buscaminas.html"
-                , label = text "Live example"
-                },
-                { url = "https://github.com/mikeldalmauc/buscaminas"
-                , label = sourcelabel
-                })
-            _ -> 
-                ({ url = "/playground/buscaminas/buscaminas.html"
-                , label = text "Live example"
-                },
-                { url = "/playground/tetris/tetris.html"
-                , label = sourcelabel
-                })
+        links = 
+            [ ({ url = "/playground/tetris/tetris.html", label = text "Live example"}, { url = "https://github.com/mikeldalmauc/tetris" , label = sourcelabel})
+            , ({ url = "/playground/particles/app.html", label = text "Live example"}, { url = "https://github.com/mikeldalmauc/elmparticles", label = sourcelabel})
+            , ({ url = "/playground/buscaminas/buscaminas.html", label = text "Live example"}, { url = "https://github.com/mikeldalmauc/buscaminas", label = sourcelabel})
+            ]
 
         liveExampleAttrs = Base.secondaryFontAttrs ++ 
                         [ Font.size 40
@@ -216,20 +192,25 @@ linkToPage tab device =
                         , Font.underline
                         ]
     in 
-        column (Base.secondaryFontAttrs ++ [
-              centerY
-            , centerX
-            , moveRight 200
-            , Background.color Base.black08
-            , Border.color Base.gray80
-            , padding 40
-            , Border.rounded 10
-            , Border.solid
-            , Border.width 4
-            , Border.glow (rgba 1 1 1 0.5) 10.0
-            , htmlAttribute (Attrs.attribute "style" "z-index:20")
-            ]) 
-            <| [ paragraph liveExampleAttrs <| [ link [] liveExample ]
-                , el [transparent True] <| text " "
-                , paragraph sourceAttrs <| [ link [] sourceCode ]
-                ]
+        List.indexedMap (\index (liveExample, sourceCode) ->
+             (String.fromInt <| index+1,
+                layoutWith {options = [noStaticStyleSheet]} [] <| column (Base.secondaryFontAttrs ++ [
+                    centerY
+                    , centerX
+                    , moveRight 200
+                    , Background.color Base.black08
+                    , Border.color Base.gray80
+                    , padding 40
+                    , Border.rounded 10
+                    , Border.solid
+                    , Border.width 4
+                    , Border.glow (rgba 1 1 1 0.5) 10.0
+                    , htmlAttribute (Attrs.attribute "style" "z-index:20")
+                    ]) 
+                    <| [ paragraph liveExampleAttrs <| [ link [] liveExample ]
+                        , el [transparent True] <| text " "
+                        , paragraph sourceAttrs <| [ link [] sourceCode ]
+                        ])
+        ) links
+
+    

@@ -118,7 +118,6 @@ function playgroundTasks(){
 }
 
 
-
 function watchTask() {
     // Watch for changes in any SCSS or JS files, and run the scssTask,
     // jsTask, and preventCachingTask functions whenever there is a change.
