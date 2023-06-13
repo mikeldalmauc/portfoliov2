@@ -11,9 +11,6 @@ import Tuple exposing (first)
 import Html.Attributes as Attrs
 import Element.Background as Background
 import Element.Border as Border
-import Json.Encode exposing (string)
-import Html.Parser
-import Html.Parser.Util
 
 type alias Texts = List (String, String)
 
