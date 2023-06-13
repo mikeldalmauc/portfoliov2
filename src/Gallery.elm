@@ -1,6 +1,7 @@
 module Gallery exposing 
     ( view
     , viewText
+    , viewClickable
     , Config
     , config
     , Length
@@ -19,7 +20,7 @@ module Gallery exposing
     , index
     , next
     , previous
-    , current
+    , current, viewTextSlides
     )
 
 {-|
@@ -291,11 +292,25 @@ viewText ((Config configR) as config_) ((State _ drag _) as state) navigation sl
         , Lazy.lazy2 styleSheet config_ drag
         ]
             ++ List.map (viewControls state) navigation
+viewClickable : Config -> State -> List Controls -> List ( String, Html Msg ) -> Html Msg
+viewClickable ((Config configR) as config_) ((State _ drag _) as state) navigation slides =
+    div [ id configR.id ] <|
+        [ Lazy.lazy2 viewClickableSlides state slides
+        , Lazy.lazy2 styleSheet config_ drag
+        ]
+            ++ List.map (viewControls state) navigation
 
 viewTextSlides : State -> List ( String, Html Msg ) -> Html Msg
 viewTextSlides ((State index_ _ _) as state) slides =
     Keyed.ul (viewSlidesAttributes state) <|
         List.indexedMap (viewTextSlide index_) slides
+
+
+viewClickableSlides : State -> List ( String, Html Msg ) -> Html Msg
+viewClickableSlides ((State index_ _ _) as state) slides =
+    Keyed.ul (viewSlidesAttributes state) <|
+        List.indexedMap (viewClickableSlide index_) slides
+
 -- SLIDES
 
 
@@ -355,6 +370,17 @@ viewTextSlide currentIndex slideIndex ( id, html ) =
         [ html ]
     )
 
+viewClickableSlide : Index -> Index -> ( String, Html Msg ) -> ( String, Html Msg )
+viewClickableSlide currentIndex slideIndex ( id, html ) =
+    ( id
+    , div
+        [ classList
+            [ ( "elm-gallery-itemcontainer-clickable", True )
+            , ( "elm-gallery-current", currentIndex == slideIndex )
+            ]
+        ]
+        [ html ]
+    )
 
 
 -- NAVIGATION
@@ -623,10 +649,27 @@ styleSheet (Config config_) drag =
                 ++ config_.id
                 ++ """ .elm-gallery-next {
                 position: absolute;
-                width: 18rem;
+                width: 8rem;
                 height: 100%;
                 
             }
+
+            #"""
+                ++ config_.id
+                ++ """ .elm-gallery-next:hover {
+               
+                opacity: .6;
+                background-color: rgba(100, 100, 100, .2);
+            }
+
+            #"""
+                ++ config_.id
+                ++ """ .elm-gallery-previous:hover {
+               
+                opacity: .6;
+                background-color: rgba(100, 100, 100, .2);
+            }
+
 
             #"""
                 ++ config_.id
@@ -657,6 +700,14 @@ styleSheet (Config config_) drag =
                 width: 100%;
                 height: 100%;
                 pointer-events: none;
+            }
+
+            #"""
+                ++ config_.id
+                ++ """ .elm-gallery-itemcontainer-clickable {
+                position: relative;
+                width: 100%;
+                height: 100%;
             }
 
             #"""

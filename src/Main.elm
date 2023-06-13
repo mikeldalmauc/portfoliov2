@@ -437,17 +437,21 @@ viewSliderTab justChangedTab maybeLinks images texts dimensions device gallerySt
 
         imageConfig = ViewTab.imageConfig slidesTransitionTime (toFloat dimensions.width * conf.sliderWidthFactor) (toFloat dimensions.height * conf.sliderHeightFactor)
         textConfig = ViewTab.textConfig slidesTransitionTime (toFloat dimensions.width * conf.sliderWidthFactor) (toFloat dimensions.height * conf.sliderHeightFactor)
-        linksGallery =  case maybeLinks of
-                            Just linksSectionView -> 
-                                el [transparent False] <| html <| Html.div [] <| [Html.map GalleryMsg <|
-                                    Gallery.view imageConfig galleryState.links [] <| linksSectionView device]
-                            Nothing -> 
-                                el [transparent True] <| html <| Html.div [] <| [Html.map GalleryMsg <|
-                                    Gallery.view imageConfig galleryState.links [] <| linkToPage device]
-        
-        imageGallery =  el [inFront linksGallery] <| html <| Html.div [] <| [Html.map GalleryMsg <|
-                        Gallery.view imageConfig galleryState.image [Gallery.Arrows] (ViewTab.imageSlides images)]
 
+        (linksGallery, imageGallery) =  case maybeLinks of
+                            Just linksSectionView -> 
+                                (el [transparent False
+                                    , moveRight conf.leftDisplacement
+                                    , moveDown conf.upDisplacement
+                                ] <| html <| Html.div [] <| [Html.map GalleryMsg <|
+                                    Gallery.viewClickable imageConfig galleryState.links [Gallery.Arrows] <| linksSectionView device]
+                                , el [] <| html <| Html.div [] <| [Html.map GalleryMsg <|
+                                 Gallery.view imageConfig galleryState.image [] (ViewTab.imageSlides images)])
+                            Nothing -> 
+                                (el [] none
+                                , el [] <| html <| Html.div [] <| [Html.map GalleryMsg <|
+                                    Gallery.view imageConfig galleryState.image [Gallery.Arrows] (ViewTab.imageSlides images)])
+        
         textGallery = el (brandFontAttrs ++ [
               width fill
             , height fill
@@ -457,6 +461,7 @@ viewSliderTab justChangedTab maybeLinks images texts dimensions device gallerySt
             , Font.alignLeft
             , htmlAttribute (Attrs.attribute "style" "pointer-events: none;")
             , shadow {offset = (5, 5), blur = 5, color= rgba 0 0 0 0.5}
+            , inFront linksGallery
             ]) 
             <| html 
                 <| Html.div [] [Html.map GalleryMsg <| Gallery.viewText textConfig galleryState.text [] (ViewTab.textSlides device texts) ]

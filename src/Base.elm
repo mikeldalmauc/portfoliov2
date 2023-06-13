@@ -4,41 +4,13 @@ import Element exposing (Attribute, rgb, Device, DeviceClass(..))
 import Element.Font as Font
 import Element exposing (Color)
 import Mailto exposing (mailto, subject)
-import Gallery.Image exposing (..)
 import Html
 import Html.Attributes as Attrs
+import Svg 
+import Svg.Attributes as SvgAttrs
+import Html exposing (Html)
 
 
-
--- srcset="example-320.jpg 320w, example-640.avif 640w, example-1024.webp 1024w, 
--- example-1280.jpg 1280w, example-1920.avif 1920w, example-2560.webp 2560w">
-srcSet : Url -> String
-srcSet image =
-    List.map (\suffix -> image ++ suffix) (crossProduct ["or", "lg", "md"] ["avif", "webp", "jpg"])
-        |> String.join ", "
-    
-
-crossProduct : List String -> List String -> List String
-crossProduct sizes formats =
-    List.concatMap (\size -> List.map (\format -> "-" ++ size ++ "." ++ format ++ " " ++ (sizeWidth size)) formats) sizes
-
-sizeWidth : String -> String
-sizeWidth size =
-    case size of 
-        "or" ->
-            "2560w"
-        "lg" ->
-            "1920w"
-        "md" ->
-            "1280w"
-        "sm" ->
-            "1024w"
-        "xs" ->
-            "640w"
-        "xxs" ->
-            "320w"
-        _ ->
-            "1280w"
             
 type alias LayoutConf =                 
     { fontSize : Int
@@ -79,35 +51,7 @@ layoutConf device =
                 }
 
 
-slideCustom : List (Html.Attribute msg) -> Url -> Size -> Html.Html msg
-slideCustom attrs url size =
 
-    Html.img
-        ([ Attrs.src (url ++ "-or.jpg")
-        , Attrs.style "object-fit" (toObjectFit size)
-        , Attrs.class "elm-gallery-image"
-        , Attrs.attribute "srcset" <| srcSet url
-        , Attrs.attribute "sizes" <| "100vw"
-        ]
-            ++ attrs
-        )
-        [ Html.div 
-            [ Attrs.attribute "position" "absolute"
-            , Attrs.attribute "pointer-events" "none"
-            , Attrs.attribute "font-family" "EB Garamond, serif"
-            , Attrs.attribute "font-weight" "400"
-            , Attrs.attribute "font-size" "67"
-            ] [Html.text "hello"]
-        ]
-
-toObjectFit : Size -> String
-toObjectFit size =
-    case size of
-        Cover ->
-            "cover"
-
-        Contain ->
-            "contain"
 
 partnerMailto : String
 partnerMailto =
@@ -184,3 +128,22 @@ ligthBlue = rgb 0.5 0.7 0.95
 
 goldenRatio : Float
 goldenRatio = 1.61803398875
+
+gitHubSvg : Html msg
+gitHubSvg = 
+    Svg.svg
+    [ SvgAttrs.height "32"
+    , SvgAttrs.width "32"
+    , SvgAttrs.viewBox "0 0 16 16"
+    ][
+        Svg.path [SvgAttrs.d "M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"
+        , SvgAttrs.fill "white"]
+        []
+    ]
+
+instagramSvg : Html msg
+instagramSvg = 
+    Html.div [
+        Attrs.attribute "style" <| "width: 64px; height: 64px; background-image: url('assets/instagram_logo.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;"
+    ] []
+    

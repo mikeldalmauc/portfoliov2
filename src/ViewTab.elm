@@ -3,7 +3,7 @@ module ViewTab exposing (..)
 import Gallery
 import Gallery.Image as Image
 import Html exposing (Html)
-import Base exposing (slideCustom, layoutConf)
+import Base exposing (layoutConf, instagramSvg, gitHubSvg)
 import Element exposing (..)
 import Element.Font as Font
 import Base exposing (goldenRatio)
@@ -11,16 +11,9 @@ import Tuple exposing (first)
 import Html.Attributes as Attrs
 import Element.Background as Background
 import Element.Border as Border
-import Svg 
-import Svg.Attributes as SvgAttrs
-import SvgParser exposing (parse)
+
 
 type alias Texts = List (String, String)
-
-imageSlides : List String -> List ( String, Html Gallery.Msg )
-imageSlides  images =
-    List.map (\image -> (image, slideCustom [] image Image.Contain )) images
-
 
 
 styling : Html msg
@@ -53,22 +46,11 @@ textConfig transition w h =
         , height = Gallery.px h
         }
 
-textSlides : Device -> Texts ->  List ( String, Html Gallery.Msg )
-textSlides device texts =
-    List.map (\pair -> ( first pair, textSlide device pair)) texts
+{--
 
+TABS data 
 
-textSlide : Device -> (String, String) -> Html Gallery.Msg
-textSlide device (title, subtitle) =
-    let
-        conf = layoutConf device
-
-        subtitleFont = String.fromInt conf.subtitleFontSize ++ "px"
-    in
-        Html.article [] [ Html.h3 [Attrs.attribute "style" "margin-bottom: 10px;"] [ Html.text title]
-            , Html.p 
-                [ Attrs.attribute "style" <| "font-size:"++ subtitleFont ++"; letter-spacing: 1.2px; font-family: 'Montserrat', sans-serif;word-spacing: 1.2px; font-variant: normal;"
-                ] [ Html.text subtitle ] ]
+--}
 
 imagesTab1 : List String
 imagesTab1 =
@@ -138,7 +120,7 @@ textsTab3 =
       ("Tetris\n", "Implementation of Tetris in Elm")
     , ("Elm Particles\n", "Implementations using\nElm particles library")
     , ("Minesweeper", "Full js implementation of\nclassic Minesweeper game")
-    , ("Instagram filters", "Filters created\nwith Spark AR Studio")
+    , ("Instagram\nfilters", "Filters created\nwith Spark AR Studio")
     ]
 
 -- TODO add code for normal desktp sizes
@@ -147,31 +129,21 @@ Github svg
 
 
 --}
+imageSlides : List String -> List ( String, Html Gallery.Msg )
+imageSlides  images =
+    List.map (\image -> (image, slideCustom [] image Image.Contain )) images
 
-gitHubSvg : Html msg
-gitHubSvg = 
-    Svg.svg
-    [ SvgAttrs.height "32"
-    , SvgAttrs.width "32"
-    , SvgAttrs.viewBox "0 0 16 16"
-    ][
-        Svg.path [SvgAttrs.d "M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"
-        , SvgAttrs.fill "white"]
-        []
-    ]
 
-instagramSvg : Html msg
-instagramSvg = 
-    let            
-        svga = case parse "assets/Instagram_logo_2016.svg" of
-            Err _ ->
-                Html.text "Error loading svg"
-            Ok svg ->
-                svg
 
-    in
-    Svg.svg [ SvgAttrs.viewBox "0 0 16 16", SvgAttrs.width "32", SvgAttrs.height "32" ]
-        [ svga ]
+igSourceLabel : Html msg -> String -> Element msg
+igSourceLabel icon label = 
+    row [spaceEvenly ] 
+        [
+          el [transparent True] <| text " "
+        , html icon
+        , text label
+        , el [transparent True] <| text " "
+        ]
 
 sourceLabel : Html msg -> String -> Element msg
 sourceLabel icon label = 
@@ -188,6 +160,76 @@ sourceLabel icon label =
         ]
 
 
+textSlides : Device -> Texts ->  List ( String, Html Gallery.Msg )
+textSlides device texts =
+    List.map (\pair -> ( first pair, textSlide device pair)) texts
+
+
+textSlide : Device -> (String, String) -> Html Gallery.Msg
+textSlide device (title, subtitle) =
+    let
+        conf = layoutConf device
+
+        subtitleFont = String.fromInt conf.subtitleFontSize ++ "px"
+    in
+        Html.article [] [ Html.h3 [Attrs.attribute "style" "margin-bottom: 10px;"] [ Html.text title]
+            , Html.p 
+                [ Attrs.attribute "style" <| "font-size:"++ subtitleFont ++"; letter-spacing: 1.2px; font-family: 'Montserrat', sans-serif;word-spacing: 1.2px; font-variant: normal;"
+                ] [ Html.text subtitle ] ]
+
+slideCustom : List (Html.Attribute msg) -> Image.Url -> Image.Size -> Html.Html msg
+slideCustom attrs url size =
+
+    Html.img
+        ([ Attrs.src (url ++ "-or.jpg")
+        , Attrs.style "object-fit" (toObjectFit size)
+        , Attrs.class "elm-gallery-image"
+        , Attrs.attribute "srcset" <| srcSet url
+        , Attrs.attribute "sizes" <| "100vw"
+        ]
+            ++ attrs
+        )
+        [ ]
+
+toObjectFit : Image.Size -> String
+toObjectFit size =
+    case size of
+        Image.Cover ->
+            "cover"
+
+        Image.Contain ->
+            "contain"
+
+-- srcset="example-320.jpg 320w, example-640.avif 640w, example-1024.webp 1024w, 
+-- example-1280.jpg 1280w, example-1920.avif 1920w, example-2560.webp 2560w">
+srcSet : Image.Url -> String
+srcSet image =
+    List.map (\suffix -> image ++ suffix) (crossProduct ["or", "lg", "md"] ["avif", "webp", "jpg"])
+        |> String.join ", "
+    
+
+crossProduct : List String -> List String -> List String
+crossProduct sizes formats =
+    List.concatMap (\size -> List.map (\format -> "-" ++ size ++ "." ++ format ++ " " ++ (sizeWidth size)) formats) sizes
+
+sizeWidth : String -> String
+sizeWidth size =
+    case size of 
+        "or" ->
+            "2560w"
+        "lg" ->
+            "1920w"
+        "md" ->
+            "1280w"
+        "sm" ->
+            "1024w"
+        "xs" ->
+            "640w"
+        "xxs" ->
+            "320w"
+        _ ->
+            "1280w"
+
 linkToPage : Device -> List ( String, Html Gallery.Msg )
 linkToPage  device = 
     let 
@@ -195,7 +237,7 @@ linkToPage  device =
         
         sourcelabel = sourceLabel gitHubSvg "Source" 
 
-        sourcelabelIG = sourceLabel instagramSvg "View on Instagram" 
+        sourcelabelIG = igSourceLabel instagramSvg "Try on Instagram" 
 
         links = 
             [ ({ url = "/playground/tetris/tetris.html", label = text "Live example"}, { url = "https://github.com/mikeldalmauc/tetris" , label = sourcelabel}, False)
