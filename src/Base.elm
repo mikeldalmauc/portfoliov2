@@ -146,4 +146,3 @@ instagramSvg =
     Html.div [
         Attrs.attribute "style" <| "width: 64px; height: 64px; background-image: url('assets/instagram_logo.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;"
     ] []
-    

@@ -42,6 +42,7 @@ type alias Model =
     , galleryTab1 : GalleryState
     , galleryTab2 : GalleryState
     , galleryTab3 : GalleryState
+    , galleryTab4 : GalleryState
     }
 
 type alias GalleryState = 
@@ -88,6 +89,7 @@ init flags =
         , galleryTab1 = initGalleryState (List.length ViewTab.imagesTab1)
         , galleryTab2 = initGalleryState (List.length ViewTab.imagesTab2)
         , galleryTab3 = initGalleryState (List.length ViewTab.imagesTab3)
+        , galleryTab4 = initGalleryState (List.length ViewTab.embeddedTab4)
     }
     , Cmd.none
     )
@@ -207,6 +209,8 @@ actualGallery model =
            Just model.galleryTab2
         3 ->
            Just model.galleryTab3
+        4 ->
+           Just model.galleryTab4
         _ ->
             Nothing
 
@@ -219,6 +223,8 @@ updateGallery  galleryState model =
             { model | galleryTab2 = galleryState}
         3 ->
             { model | galleryTab3 = galleryState}
+        4 ->
+            { model | galleryTab4 = galleryState}
         _ -> model
 
             
@@ -412,21 +418,26 @@ viewTab0 model =
 
 viewTab1 : Model -> Element Msg
 viewTab1 model = 
-   viewSliderTab model.justChangedTab Nothing ViewTab.imagesTab1 ViewTab.textsTab1 model.dimensions model.device model.galleryTab1
+   viewSliderTab model.justChangedTab Nothing Nothing (Just ViewTab.imagesTab1) ViewTab.textsTab1 model.dimensions model.device model.galleryTab1
 
 
 viewTab2 : Model -> Element Msg
 viewTab2 model = 
-    viewSliderTab model.justChangedTab Nothing ViewTab.imagesTab2 ViewTab.textsTab2 model.dimensions model.device model.galleryTab2
+    viewSliderTab model.justChangedTab Nothing Nothing (Just ViewTab.imagesTab2) ViewTab.textsTab2 model.dimensions model.device model.galleryTab2
 
 
 viewTab3 : Model -> Element Msg
 viewTab3 model = 
-    viewSliderTab model.justChangedTab (Just linkToPage) ViewTab.imagesTab3 ViewTab.textsTab3 model.dimensions model.device model.galleryTab3
+    viewSliderTab model.justChangedTab (Just linkToPage) Nothing (Just ViewTab.imagesTab3) ViewTab.textsTab3 model.dimensions model.device model.galleryTab3
 
 
-viewSliderTab : Bool -> Maybe (Device -> List ( String, Html Gallery.Msg )) -> List String -> ViewTab.Texts -> Flags -> Device -> GalleryState -> Element Msg
-viewSliderTab justChangedTab maybeLinks images texts dimensions device galleryState = 
+viewTab4 : Model -> Element Msg
+viewTab4 model = 
+    viewSliderTab model.justChangedTab Nothing (Just ViewTab.embeddedTab4) Nothing ViewTab.textsTab4 model.dimensions model.device model.galleryTab4
+
+
+viewSliderTab : Bool -> Maybe (Device -> List ( String, Html Gallery.Msg )) -> Maybe (List String)  -> Maybe (List String) -> ViewTab.Texts -> Flags -> Device -> GalleryState -> Element Msg
+viewSliderTab justChangedTab maybeLinks maybeEmbeddings maybeImages texts dimensions device galleryState = 
 
     let
         conf  = layoutConf device
@@ -437,20 +448,37 @@ viewSliderTab justChangedTab maybeLinks images texts dimensions device gallerySt
 
         imageConfig = ViewTab.imageConfig slidesTransitionTime (toFloat dimensions.width * conf.sliderWidthFactor) (toFloat dimensions.height * conf.sliderHeightFactor)
         textConfig = ViewTab.textConfig slidesTransitionTime (toFloat dimensions.width * conf.sliderWidthFactor) (toFloat dimensions.height * conf.sliderHeightFactor)
-
-        (linksGallery, imageGallery) =  case maybeLinks of
-                            Just linksSectionView -> 
-                                (el [transparent False
-                                    , moveRight conf.leftDisplacement
-                                    , moveDown conf.upDisplacement
-                                ] <| html <| Html.div [] <| [Html.map GalleryMsg <|
-                                    Gallery.viewClickable imageConfig galleryState.links [Gallery.Arrows] <| linksSectionView device]
-                                , el [] <| html <| Html.div [] <| [Html.map GalleryMsg <|
-                                 Gallery.view imageConfig galleryState.image [] (ViewTab.imageSlides images)])
+        
+        imageGallery = 
+            case maybeImages of 
+                Just images -> 
+                     case maybeLinks of
+                            Just _ -> 
+                                el [] <| html <| Html.div [] <| [Html.map GalleryMsg <|
+                                        Gallery.view imageConfig galleryState.image [] (ViewTab.imageSlides images)]
                             Nothing -> 
-                                (el [] none
-                                , el [] <| html <| Html.div [] <| [Html.map GalleryMsg <|
-                                    Gallery.view imageConfig galleryState.image [Gallery.Arrows] (ViewTab.imageSlides images)])
+                                el [] <| html <| Html.div [] <| [Html.map GalleryMsg <|
+                                        Gallery.view imageConfig galleryState.image [Gallery.Arrows] (ViewTab.imageSlides images)]
+                Nothing -> 
+                    el [] none
+
+        linksGallery = 
+            case maybeLinks of
+                Just linksSectionView -> 
+                    el [transparent False, moveRight conf.leftDisplacement, moveDown conf.upDisplacement] 
+                        <| html <| Html.div [] <| [Html.map GalleryMsg <|
+                            Gallery.viewClickable imageConfig galleryState.links [Gallery.Arrows] <| linksSectionView device]
+                Nothing -> 
+                    el [] none
+                
+        embeddedGallery = 
+            case maybeEmbeddings of
+                Just embeddedSectionView -> 
+                    el []  <| html <| Html.div [] <| [Html.map GalleryMsg <|
+                            Gallery.viewClickable imageConfig galleryState.image [Gallery.Arrows] <| (ViewTab.embeddedSlides embeddedSectionView) ]
+                Nothing -> 
+                    el [] none
+
         
         textGallery = el (brandFontAttrs ++ [
               width fill
@@ -471,23 +499,13 @@ viewSliderTab justChangedTab maybeLinks images texts dimensions device gallerySt
                 row
                 [ width fill, height fill, Font.color <| rgb 255 255 255
                 , behindContent imageGallery
+                , behindContent embeddedGallery
                 ]
                 [
                    textGallery
                 ]
 
 
-viewTab4 : Model -> Element Msg
-viewTab4 model = 
-    el [ centerX, centerY] 
-        <|
-            column
-            [ width fill, height fill, Font.color <| rgb 255 255 255]
-            [
-                paragraph
-                    [ Font.size 48, Font.center ]
-                    [ el [ Font.italic ] <| text "Tab 4" ]
-            ]
 viewTab5 : Model -> Element Msg
 viewTab5 model = 
     el [ centerX, centerY] 
