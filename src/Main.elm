@@ -27,7 +27,8 @@ import Random
 import Keyboard.Event exposing (KeyboardEvent, decodeKeyboardEvent)
 import Keyboard.Key as Key
 import Json.Decode as Json
-
+import Browser.Navigation exposing (back)
+import  Html.Lazy as Lazy
 
 type alias Model =
 
@@ -302,7 +303,7 @@ desktopLayout model =
     in 
         layout
             [ width fill, height fill, Background.color black08
-                , behindContent <| infoDebug model -- TODO hide maybe
+                , behindContent <| infoDebug model -- TODO hide maybeÇ
                 -- , Element.explain Debug.todo
             ]
             <|  column
@@ -336,7 +337,7 @@ infoDebug model =
 
 tabs : List (Model -> Element Msg )
 tabs = 
-    [viewTab0, viewTab1, viewTab2, viewTab3, viewTab4, viewTab5, viewTab6, viewTab7]
+    [viewTab0, viewTab1, viewTab2, viewTab3, viewTab4]
     
 viewTab : Model -> Element Msg
 viewTab model =
@@ -362,7 +363,40 @@ previousTab actual  =
         
 tabsSlider : Int -> Element Msg
 tabsSlider actual = 
-    Input.slider
+    let
+        positions = List.length tabs - 1
+        margin = (toFloat actual - 1) / (toFloat positions - 1) *80 |> round
+       
+        translate = toCssTranslate (positions - 1) (actual - 1) 0 0
+        buttonAttrs = [
+                  pointer
+                , Background.color Base.black08
+                , padding 10]
+
+        buttons : Element Msg
+        buttons = 
+            column 
+            [spacing 60,
+            centerX,
+            centerY
+            ] 
+            [ el (buttonAttrs ++ [ onClick (ToTab (previousTab actual)), transparent <| actual == 1]) <| html <| upArrowSvg "#7f7f7f"
+            , el (buttonAttrs ++ [ onClick (ToTab (nextTab actual)), transparent <| actual == List.length tabs - 1]) <| html <| downArrowSvg "#7f7f7f"]  
+
+        thumb = el 
+            [ paddingEach { top = 40, bottom = 40, left = 10, right = 10 }
+            , Background.color Base.black08
+            , Font.color Base.gray50
+            , centerX
+            -- , moveDown <| toFloat margin
+            , htmlAttribute (Attrs.attribute "style" <| styleSheet ++ " " ++ translate)
+            , inFront buttons
+            ] 
+            <| text <| String.fromInt actual ++ "\n  /\n   " ++ String.fromInt positions
+
+    in
+    
+        el 
         [ height fill 
         -- , rotate <| degrees -180
         , width <| px 1
@@ -377,17 +411,32 @@ tabsSlider actual =
                 , Border.rounded 6
                 ]
                 Element.none
-        ]
-        { onChange = UserMovedSlider << round
-        , label = Input.labelHidden ("Integer value: " ++ String.fromInt (actual*10))
-        , min = 10 * (toFloat (List.length tabs) - 1)
-        , max = 10
-        , step = Just 10
-        , value = toFloat actual*10
-        , thumb = Input.defaultThumb
-        }
+        -- , htmlAttribute (Attrs.attribute "style" <| "padding-top:" ++ fromInt margin ++ "%;")
+        -- , spacingTop margin
+        ] <| thumb 
     
-            
+
+
+styleSheet :  String
+styleSheet  =
+    """            
+       transition: transform 400ms ease;
+    """
+        
+
+
+toCssTranslate : Int -> Int -> Int -> Int -> String
+toCssTranslate slideCount index_ x y =
+    "transform: "
+    -- translate3d("
+    --     ++ String.fromFloat (toFloat index_ * (100 / toFloat slideCount))
+    --     ++ "%, "
+    --     ++ String.fromInt y
+    --     ++ "px, 0) "
+        ++ "translate(0px,"
+        ++ String.fromFloat (toFloat index_ * (80 / toFloat slideCount))
+        ++ "vh);"
+
 
 viewTab0 : Model -> Element Msg 
 viewTab0 model = 
@@ -441,105 +490,86 @@ viewSliderTab justChangedTab maybeLinks maybeEmbeddings maybeImages texts dimens
 
     let
         conf  = layoutConf device
-        slidesTransitionTime = if justChangedTab then
-                            0
-                        else
-                            400
-
+        slidesTransitionTime =  if justChangedTab then 0 else 400
         imageConfig = ViewTab.imageConfig slidesTransitionTime (toFloat dimensions.width * conf.sliderWidthFactor) (toFloat dimensions.height * conf.sliderHeightFactor)
         textConfig = ViewTab.textConfig slidesTransitionTime (toFloat dimensions.width * conf.sliderWidthFactor) (toFloat dimensions.height * conf.sliderHeightFactor)
-        
-        imageGallery = 
-            case maybeImages of 
-                Just images -> 
-                     case maybeLinks of
-                            Just _ -> 
-                                el [] <| html <| Html.div [] <| [Html.map GalleryMsg <|
-                                        Gallery.view imageConfig galleryState.image [] (ViewTab.imageSlides images)]
-                            Nothing -> 
-                                el [] <| html <| Html.div [] <| [Html.map GalleryMsg <|
-                                        Gallery.view imageConfig galleryState.image [Gallery.Arrows] (ViewTab.imageSlides images)]
-                Nothing -> 
-                    el [] none
-
-        linksGallery = 
+        hasLinks = 
             case maybeLinks of
-                Just linksSectionView -> 
-                    el [transparent False, moveRight conf.leftDisplacement, moveDown conf.upDisplacement] 
-                        <| html <| Html.div [] <| [Html.map GalleryMsg <|
-                            Gallery.viewClickable imageConfig galleryState.links [Gallery.Arrows] <| linksSectionView device]
-                Nothing -> 
-                    el [] none
-                
-        embeddedGallery = 
-            case maybeEmbeddings of
-                Just embeddedSectionView -> 
-                    el []  <| html <| Html.div [] <| [Html.map GalleryMsg <|
-                            Gallery.viewClickable imageConfig galleryState.image [Gallery.Arrows] <| (ViewTab.embeddedSlides embeddedSectionView) ]
-                Nothing -> 
-                    el [] none
+                Just _ -> True
+                Nothing -> False
 
-        
-        textGallery = el (brandFontAttrs ++ [
-              width fill
-            , height fill
-            , Font.size conf.fontSize
-            , moveLeft conf.leftDisplacement
-            , moveUp conf.upDisplacement
-            , Font.alignLeft
-            , htmlAttribute (Attrs.attribute "style" "pointer-events: none;")
-            , shadow {offset = (5, 5), blur = 5, color= rgba 0 0 0 0.5}
-            , inFront linksGallery
-            ]) 
-            <| html 
-                <| Html.div [] [Html.map GalleryMsg <| Gallery.viewText textConfig galleryState.text [] (ViewTab.textSlides device texts) ]
+        imageGallery = viewImageGallery hasLinks galleryState imageConfig maybeImages
+        linksGallery = viewLinksGallery device  galleryState imageConfig maybeLinks
+        embeddedGallery = viewEmbeddedsGallery galleryState imageConfig maybeEmbeddings
+        textGallery = viewTextsGallery device galleryState textConfig texts linksGallery
+
     in
-        el [ centerX, centerY] 
-            <|
-                row
-                [ width fill, height fill, Font.color <| rgb 255 255 255
-                , behindContent imageGallery
-                , behindContent embeddedGallery
-                ]
-                [
-                   textGallery
-                ]
-
-
-viewTab5 : Model -> Element Msg
-viewTab5 model = 
-    el [ centerX, centerY] 
-        <|
-            column
-            [ width fill, height fill, Font.color <| rgb 255 255 255]
-            [
-                paragraph
-                    [ Font.size 48, Font.center ]
-                    [ el [ Font.italic ] <| text "Tab 5" ]
+        el [ centerX, centerY ]
+            <| row
+            [ width fill, height fill, Font.color <| rgb 255 255 255
+            , behindContent imageGallery
+            , behindContent embeddedGallery
             ]
-viewTab6 : Model -> Element Msg
-viewTab6 model = 
-    el [ centerX, centerY] 
-        <|
-            column
-            [ width fill, height fill, Font.color <| rgb 255 255 255]
             [
-                paragraph
-                    [ Font.size 48, Font.center ]
-                    [ el [ Font.italic ] <| text "Tab 6" ]
-            ]
-viewTab7 : Model -> Element Msg
-viewTab7 model = 
-    el [ centerX, centerY] 
-        <|
-            column
-            [ width fill, height fill, Font.color <| rgb 255 255 255]
-            [
-                paragraph
-                    [ Font.size 48, Font.center ]
-                    [ el [ Font.italic ] <| text "Tab 7" ]
+                textGallery
             ]
 
+
+viewImageGallery : Bool -> GalleryState -> Gallery.Config ->  Maybe (List String) -> Element Msg
+viewImageGallery hasLinks galleryState imageConfig maybeImages =
+    case maybeImages of 
+        Just images -> 
+            let
+                arrows = if hasLinks then [] else []
+            in
+            
+                el [] <| html <| Html.div [] <| [Html.map GalleryMsg <|
+                        Gallery.view imageConfig galleryState.image arrows (ViewTab.imageSlides images)]
+        Nothing -> 
+            el [] none
+
+viewLinksGallery : Device -> GalleryState -> Gallery.Config -> Maybe (Device -> List ( String, Html Gallery.Msg )) -> Element Msg
+viewLinksGallery device galleryState imageConfig maybeLinks  =
+    let
+        conf  = layoutConf device
+    in
+        case maybeLinks of
+            Just linksSectionView -> 
+                el [transparent False, moveRight conf.leftDisplacement, moveDown conf.upDisplacement] 
+                    <| html <| Html.div [] <| [Html.map GalleryMsg <|
+                        Gallery.viewClickable imageConfig galleryState.links [Gallery.Arrows] <| linksSectionView device]
+            Nothing -> 
+                el [] none
+
+viewEmbeddedsGallery : GalleryState -> Gallery.Config -> Maybe (List String) -> Element Msg
+viewEmbeddedsGallery galleryState imageConfig maybeEmbeddings = 
+    case maybeEmbeddings of
+        Just embeddedSectionView -> 
+            el []  <| html <| Html.div [] <| [Html.map GalleryMsg <|
+                    Gallery.viewClickable imageConfig galleryState.image [Gallery.Arrows] <| (ViewTab.embeddedSlides embeddedSectionView) ]
+        Nothing -> 
+            el [] none
+
+
+viewTextsGallery : Device -> GalleryState -> Gallery.Config -> ViewTab.Texts -> Element Msg -> Element Msg
+viewTextsGallery device galleryState textConfig texts linksGallery = 
+    let 
+        conf  = layoutConf device
+    in
+        el (brandFontAttrs 
+            ++ [  width fill
+                , height fill
+                , Font.size conf.fontSize
+                , moveLeft conf.leftDisplacement
+                , moveUp conf.upDisplacement
+                , Font.alignLeft
+                , htmlAttribute (Attrs.attribute "style" "pointer-events: none;")
+                , shadow {offset = (5, 5), blur = 5, color= rgba 0 0 0 0.5}
+                , inFront linksGallery
+            ])  
+            <| html 
+            <| Html.div [] [Html.map GalleryMsg <| Gallery.viewText textConfig galleryState.text [] (ViewTab.textSlides device texts) ]
+    
 
 -- Subscribe to the `messageReceiver` port to hear about messages coming in
 -- from JS. Check out the index.html file to see how this is hooked up to a

@@ -658,7 +658,7 @@ styleSheet (Config config_) drag =
                 ++ config_.id
                 ++ """ .elm-gallery-next:hover {
                
-                opacity: .6;
+                opacity: .0;
                 background-color: rgba(100, 100, 100, .2);
             }
 
@@ -666,7 +666,7 @@ styleSheet (Config config_) drag =
                 ++ config_.id
                 ++ """ .elm-gallery-previous:hover {
                
-                opacity: .6;
+                opacity: .0;
                 background-color: rgba(100, 100, 100, .2);
             }
 

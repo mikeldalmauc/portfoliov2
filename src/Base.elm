@@ -9,6 +9,7 @@ import Html.Attributes as Attrs
 import Svg 
 import Svg.Attributes as SvgAttrs
 import Html exposing (Html)
+import Element.HexColor as HexColor
 
 
             
@@ -109,6 +110,7 @@ highlight = rgb 1 1 1
 
 gray50 : Color
 gray50 = rgb  0.5 0.5 0.5
+-- #7f7f7f
 
 gray80 : Color
 gray80 = rgb  0.8 0.8 0.8
@@ -146,3 +148,26 @@ instagramSvg =
     Html.div [
         Attrs.attribute "style" <| "width: 64px; height: 64px; background-image: url('assets/instagram_logo.svg'); background-size: contain; background-repeat: no-repeat; background-position: center;"
     ] []
+
+upArrowSvg : String -> Html msg
+upArrowSvg color =
+    arrowSvg color "0"
+
+downArrowSvg : String -> Html msg
+downArrowSvg color =
+    arrowSvg color "180"
+
+arrowSvg : String -> String -> Html msg
+arrowSvg color rotation =
+  Svg.svg
+    [ SvgAttrs.height "20"
+    , SvgAttrs.width "20"
+    , SvgAttrs.viewBox "0 0 330 330"
+    , SvgAttrs.transform <| "rotate(" ++ rotation ++ " 0 0)"
+    ][
+        Svg.path [SvgAttrs.d """M325.606,229.393l-150.004-150C172.79,76.58,168.974,75,164.996,75c-3.979,0-7.794,1.581-10.607,4.394
+                                l-149.996,150c-5.858,5.858-5.858,15.355,0,21.213c5.857,5.857,15.355,5.858,21.213,0l139.39-139.393l139.397,139.393
+                                C307.322,253.536,311.161,255,315,255c3.839,0,7.678-1.464,10.607-4.394C331.464,244.748,331.464,235.251,325.606,229.393z"""
+           , SvgAttrs.fill color]
+        []
+    ]
