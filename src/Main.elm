@@ -29,6 +29,8 @@ import Keyboard.Key as Key
 import Json.Decode as Json
 import Browser.Navigation exposing (back)
 import  Html.Lazy as Lazy
+import Slider 
+import Html exposing (p)
 
 type alias Model =
 
@@ -159,15 +161,13 @@ update msg modelPrev =
             SwipeEnd touch ->
                 let
                     gesture = Swipe.record touch model.gesture
-                    newTab = 
-                        if (Swipe.isUpSwipe 150.0 gesture) then
-                            nextTab model.tab
-                        else if (Swipe.isDownSwipe 150.0 gesture) then
-                            previousTab model.tab
-                        else
-                            model.tab
                 in
-                    ({ model | gesture = Swipe.blanco}, Cmd.batch [toTab newTab])
+                    if (Swipe.isUpSwipe 100.0 gesture) then
+                        ({ model | gesture = Swipe.blanco}, Cmd.batch [toTab <| nextTab model.tab])
+                    else if (Swipe.isDownSwipe 100.0 gesture) then
+                        ({ model | gesture = Swipe.blanco}, Cmd.batch [toTab <| previousTab model.tab])
+                    else
+                        ({ model | gesture = Swipe.blanco}, Cmd.none)
 
             UserMovedSlider v ->
                 (model, Cmd.batch [toTab (v // 10)])
@@ -245,9 +245,18 @@ view model =
     in
         case deviceClass of
             Phone ->
-                desktopLayout model
+                Html.div 
+                    [ Swipe.onStart Swipe
+                    , Swipe.onMove Swipe
+                    , Swipe.onEndWithOptions 
+                        { stopPropagation = True
+                        , preventDefault = False
+                        } 
+                        SwipeEnd
+                    ]
+                    [ phoneLayout model ]
             Tablet ->
-                desktopLayout model
+                phoneLayout model
             Desktop ->
                 desktopLayout model
             BigDesktop ->
@@ -277,6 +286,69 @@ view model =
             BigDesktop
         -}
 
+phoneLayout : Model -> Html Msg
+phoneLayout model = 
+    let 
+        (deviceClass, deviceOrientation) = 
+            case model.device of
+                { class, orientation} -> (class, orientation)
+
+    in 
+        case deviceOrientation of
+                Portrait ->
+                    layout
+                        [ width fill, height fill, Background.color black08 ]
+                        <| el (brandFontAttrs ++ [centerX, centerY, Font.color highlight, Font.center] )
+                        <| text "Turn your device\n horizontally"
+
+                Landscape ->
+                    let 
+                        conf = layoutConf model.device
+
+                        name = el (brandFontAttrs ++ [ width fill, height <| fillPortion 1, centerX, Font.color <| gray50] ) 
+                            <| paragraph [ Font.center, centerY, Font.size 20, padding 10, onClick Head] [ text "Mikel Dalmau" ]
+
+                        attrs = (secondaryFontAttrs ++ [height fill, Font.size 10, Font.color <| gray80, mouseOver [Font.color <| highlight]])
+                        menuL = el (attrs ++ [alignLeft, width (fillPortion 1)]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick Head, pointer] <| [ text "About"]
+                        menuR = el (attrs ++ [alignRight, width <| px 120]) <| paragraph [Font.center, centerY, rotate <| degrees -90, pointer] <| [
+                            link []
+                                { url = partnerMailto
+                                , label = text "mikeldalmauc@gmail.com"}
+                            ]
+                        slider = 
+                            if model.tab > 0 then 
+                                el [width <| fillPortion conf.vSliderWidthFactor, height fill, onRight 
+                                    <| Slider.phoneSlider model.tab (List.length tabs - 1)] none
+                            else
+                                el [width <| fillPortion conf.vSliderWidthFactor, height fill] none
+
+                        spaces = if model.tab == 0 then 
+                                [ el [width <| fillPortion 2, height fill] none
+                                , el [width <| fillPortion 2, height fill] none]    
+                            else
+                                [ el [width <| fillPortion 2, height fill] none
+                                , el [width <| fillPortion 2, height fill] none
+                                , el [width <| fillPortion 2, height fill] none
+                                , el [width <| fillPortion 2, height fill] none]
+                    in
+                        layout
+                            [ width fill, height fill, Background.color black08
+                                -- , behindContent <| infoDebug model -- TODO hide maybeÇ
+                                -- , Element.explain Debug.todo
+                            ]
+                            <|  column
+                                [ height fill, width fill]
+                                [ name
+                                , row
+                                    [ height <| fillPortion 8, width fill]
+                                    (  menuL :: spaces ++ 
+                                    [ viewTab model
+                                    , slider
+                                    , menuR ])
+                                , el [height <| fillPortion 1] none
+                                ]
+                        
+
 
 desktopLayout : Model -> Html Msg
 desktopLayout model = 
@@ -297,7 +369,8 @@ desktopLayout model =
             
         -- Slider definition
         slider = if model.tab > 0 then 
-                    el [width <| fillPortion conf.vSliderWidthFactor, height fill, onRight <| tabsSlider model.tab ] none
+                    el [width <| fillPortion conf.vSliderWidthFactor, height fill, onRight 
+                        <| Slider.tabsSlider model.tab (List.length tabs - 1) (ToTab (previousTab model.tab)) (ToTab (previousTab model.tab))] none
                 else
                     el [width <| fillPortion conf.vSliderWidthFactor, height fill] none
     in 
@@ -341,11 +414,23 @@ tabs =
     
 viewTab : Model -> Element Msg
 viewTab model =
-    case (head <| drop model.tab tabs ) of
-        Just tab ->
-            el [width (fillPortion 14), height (fillPortion 1)] <| tab model
-        Nothing ->
-            el [width (fillPortion 14), height (fillPortion 1)] <| viewTab1 model
+    let 
+        conf = layoutConf model.device
+
+        (deviceClass, deviceOrientation) = 
+            case model.device of
+                { class, orientation} -> (class, orientation)
+
+        heightFp = case deviceClass of 
+            Phone ->  height (fillPortion conf.tabHeightPortion)
+            _ -> height (fillPortion conf.tabHeightPortion)
+
+    in
+        case (head <| drop model.tab tabs ) of
+            Just tab ->
+                el [width (fillPortion conf.tabWidthPortion), heightFp] <| tab model
+            Nothing ->
+                el [width (fillPortion conf.tabWidthPortion), heightFp] <| viewTab1 model
 
 nextTab : Int -> Int
 nextTab actual  =   
@@ -361,91 +446,19 @@ previousTab actual  =
     else
         actual - 1
         
-tabsSlider : Int -> Element Msg
-tabsSlider actual = 
-    let
-        positions = List.length tabs - 1
-        margin = (toFloat actual - 1) / (toFloat positions - 1) *80 |> round
-       
-        translate = toCssTranslate (positions - 1) (actual - 1) 0 0
-        buttonAttrs = [
-                  pointer
-                , Background.color Base.black08
-                , padding 10]
 
-        buttons : Element Msg
-        buttons = 
-            column 
-            [spacing 60,
-            centerX,
-            centerY
-            ] 
-            [ el (buttonAttrs ++ [ onClick (ToTab (previousTab actual)), transparent <| actual == 1]) <| html <| upArrowSvg "#7f7f7f"
-            , el (buttonAttrs ++ [ onClick (ToTab (nextTab actual)), transparent <| actual == List.length tabs - 1]) <| html <| downArrowSvg "#7f7f7f"]  
-
-        thumb = el 
-            [ paddingEach { top = 40, bottom = 40, left = 10, right = 10 }
-            , Background.color Base.black08
-            , Font.color Base.gray50
-            , centerX
-            -- , moveDown <| toFloat margin
-            , htmlAttribute (Attrs.attribute "style" <| styleSheet ++ " " ++ translate)
-            , inFront buttons
-            ] 
-            <| text <| String.fromInt actual ++ "\n  /\n   " ++ String.fromInt positions
-
-    in
-    
-        el 
-        [ height fill 
-        -- , rotate <| degrees -180
-        , width <| px 1
-        -- , explain Debug.todo
-        , behindContent <|
-            -- Slider track
-            el
-                [ width <| px 1
-                , height fill
-                , centerX
-                , Background.color <| gray50
-                , Border.rounded 6
-                ]
-                Element.none
-        -- , htmlAttribute (Attrs.attribute "style" <| "padding-top:" ++ fromInt margin ++ "%;")
-        -- , spacingTop margin
-        ] <| thumb 
-    
-
-
-styleSheet :  String
-styleSheet  =
-    """            
-       transition: transform 400ms ease;
-    """
-        
-
-
-toCssTranslate : Int -> Int -> Int -> Int -> String
-toCssTranslate slideCount index_ x y =
-    "transform: "
-    -- translate3d("
-    --     ++ String.fromFloat (toFloat index_ * (100 / toFloat slideCount))
-    --     ++ "%, "
-    --     ++ String.fromInt y
-    --     ++ "px, 0) "
-        ++ "translate(0px,"
-        ++ String.fromFloat (toFloat index_ * (80 / toFloat slideCount))
-        ++ "vh);"
 
 
 viewTab0 : Model -> Element Msg 
 viewTab0 model = 
     let
         
+        conf = layoutConf model.device
+
         arrow = 
-            el [height fill, centerX, padding 45]
-            <| image [width <| px 17
-                , height <| px 60 
+            el [height fill, centerX, padding conf.arrowPadding]
+            <| image [width <| px conf.arrowWidth
+                , height <| px conf.arrowHeight
                 , alignBottom
                 , onClick <| Wheel { deltaX = 0, deltaY = 150.0 }
                 , pointer
@@ -456,10 +469,10 @@ viewTab0 model =
                 column
                 [centerY, width fill, Font.color <| rgb 255 255 255, spacing 10]
                 [ paragraph
-                        (brandFontAttrs ++ [Font.size 60, Font.center ])
+                        (brandFontAttrs ++ [Font.size conf.tab0TitleFontSize, Font.center ])
                         [ text "Mikel Dalmau" ]
                 , paragraph
-                        (baseFontAttrs ++ [Font.size 22, Font.center])
+                        (baseFontAttrs ++ [Font.size conf.tab0SubTitleFontSize, Font.center])
                         [ text "Image engineer"]
                 ]
 
@@ -520,7 +533,7 @@ viewImageGallery hasLinks galleryState imageConfig maybeImages =
     case maybeImages of 
         Just images -> 
             let
-                arrows = if hasLinks then [] else []
+                arrows = if hasLinks then [] else [Gallery.Arrows]
             in
             
                 el [] <| html <| Html.div [] <| [Html.map GalleryMsg <|

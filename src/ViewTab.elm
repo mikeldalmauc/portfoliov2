@@ -116,7 +116,7 @@ imagesTab3 =
 textsTab3 : Texts
 textsTab3 =
   [ 
-      ("Tetris\n", "Implementation of Tetris in Elm")
+      ("Tetris\n", "Implementation of\nTetris in Elm")
     , ("Elm Particles\n", "Implementations using\nElm particles library")
     , ("Minesweeper", "Full js implementation of\nclassic Minesweeper game")
     , ("Instagram\nfilters", "Filters created\nwith Spark AR Studio")
@@ -279,9 +279,9 @@ linkToPage  device =
     let 
         conf = layoutConf device
         
-        sourcelabel = sourceLabel gitHubSvg "Source" 
+        sourcelabel = sourceLabel (gitHubSvg conf.githubSize) "Source" 
 
-        sourcelabelIG = igSourceLabel instagramSvg "Try on Instagram" 
+        sourcelabelIG = igSourceLabel (instagramSvg conf.igSize) "Try on Instagram" 
 
         links = 
             [ ({ url = "/playground/tetris/tetris.html", label = text "Live example"}, { url = "https://github.com/mikeldalmauc/tetris" , label = sourcelabel}, False)
@@ -291,13 +291,13 @@ linkToPage  device =
             ]
 
         liveExampleAttrs = Base.secondaryFontAttrs ++ 
-                        [ Font.size 40
+                        [ Font.size conf.liveExampleFontSize
                         , Font.color Base.lightOrange
                         , Font.center, centerY, centerX, pointer
                         , Font.underline
                         ]
         sourceAttrs = Base.secondaryFontAttrs ++ 
-                        [ Font.size 25
+                        [ Font.size conf.sourceFontSize
                         , Font.color Base.ligthBlue
                         , Font.center, centerY, centerX, pointer
                         , Font.underline
@@ -308,10 +308,10 @@ linkToPage  device =
                 layoutWith {options = [noStaticStyleSheet]} [] <| column (Base.secondaryFontAttrs ++ [
                     centerY
                     , centerX
-                    , moveRight 200
+                    , moveRight conf.linksRightDisplacement
                     , Background.color Base.black08
                     , Border.color Base.gray80
-                    , padding 40
+                    , padding conf.linksPadding
                     , Border.rounded 10
                     , Border.solid
                     , Border.width 4
