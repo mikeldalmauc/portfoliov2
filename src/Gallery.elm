@@ -325,6 +325,8 @@ viewSlidesAttributes ((State _ drag slideCount) as state) =
     events drag
         ++ [ classList
                 [ ( "elm-gallery-transition", drag == Nothing ) ]
+           , style "-moz-transform" (toTranslate state)
+           , style "-webkit-transform" (toTranslate state)
            , style "transform" (toTranslate state)
            , style "width" (String.fromInt (100 * slideCount) ++ "%")
            , id "elm-gallery-focusable"
@@ -632,6 +634,8 @@ styleSheet (Config config_) drag =
                 border: 0;
                 cursor: pointer;
                 z-index: 2;
+                transform: -webkit-translate3d(0, 0, 0);
+                transform: -moz-translate3d(0, 0, 0);
                 transform: translate3d(0, 0, 0);
                 width: 18rem;
             }
@@ -734,6 +738,14 @@ styleSheet (Config config_) drag =
                 ++ config_.id
                 ++ """ .elm-gallery-transition {
                 transition: transform """
+                ++ String.fromInt config_.transition
+                ++ """ms ease;
+
+                transition: -moz-transform """
+                ++ String.fromInt config_.transition
+                ++ """ms ease;
+
+                transition: -webkit-transform """
                 ++ String.fromInt config_.transition
                 ++ """ms ease;
             }

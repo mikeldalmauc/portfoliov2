@@ -376,7 +376,7 @@ desktopLayout model =
     in 
         layout
             [ width fill, height fill, Background.color black08
-                , behindContent <| infoDebug model -- TODO hide maybeÇ
+                -- , behindContent <| infoDebug model -- TODO hide maybeÇ
                 -- , Element.explain Debug.todo
             ]
             <|  column
