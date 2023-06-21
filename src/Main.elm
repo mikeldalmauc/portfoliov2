@@ -46,6 +46,7 @@ type alias Model =
     , galleryTab2 : GalleryState
     , galleryTab3 : GalleryState
     , galleryTab4 : GalleryState
+    , galleryTab5 : GalleryState
     }
 
 type alias GalleryState = 
@@ -99,6 +100,7 @@ init flags =
         , galleryTab2 = initGalleryState (List.length ViewTab.imagesTab2)
         , galleryTab3 = initGalleryState (List.length ViewTab.imagesTab3)
         , galleryTab4 = initGalleryState (List.length <| ViewTab.embeddedTab4 <| Element.classifyDevice flags)
+        , galleryTab5 = initGalleryState (List.length ViewTab.imagesTab5)
     }
     , Cmd.none
     )
@@ -236,9 +238,11 @@ actualGallery model =
            Just model.galleryTab1
         2 ->
            Just model.galleryTab2
-        3 ->
-           Just model.galleryTab3
+        3 -> 
+           Just model.galleryTab5
         4 ->
+           Just model.galleryTab3
+        5 ->
            Just model.galleryTab4
         _ ->
             Nothing
@@ -250,9 +254,11 @@ updateGallery  galleryState model =
             { model | galleryTab1 = galleryState}
         2 ->
             { model | galleryTab2 = galleryState}
-        3 ->
-            { model | galleryTab3 = galleryState}
+        3 -> 
+            { model | galleryTab5 = galleryState}
         4 ->
+            { model | galleryTab3 = galleryState}
+        5 ->
             { model | galleryTab4 = galleryState}
         _ -> model
 
@@ -461,7 +467,7 @@ infoDebug model =
 
 tabs : List (Model -> Element Msg )
 tabs = 
-    [viewTab0, viewTab1, viewTab2, viewTab3, viewTab4]
+    [viewTab0, viewTab1, viewTab2, viewTab5, viewTab3, viewTab4]
     
 viewTab : AboutModalState -> Model -> Element Msg
 viewTab about model =
@@ -590,6 +596,11 @@ viewTab3 model =
 viewTab4 : Model -> Element Msg
 viewTab4 model = 
     viewSliderTab model.justChangedTab Nothing (Just <| ViewTab.embeddedTab4 model.device) Nothing ViewTab.textsTab4 model.dimensions model.device model.galleryTab4
+
+
+viewTab5 : Model -> Element Msg
+viewTab5 model = 
+    viewSliderTab model.justChangedTab Nothing Nothing (Just ViewTab.imagesTab5) ViewTab.textsTab5 model.dimensions model.device model.galleryTab5
 
 
 viewSliderTab : Bool -> Maybe (Device -> List ( String, Html Gallery.Msg )) -> Maybe (List String)  -> Maybe (List String) -> ViewTab.Texts -> Flags -> Device -> GalleryState -> Element Msg

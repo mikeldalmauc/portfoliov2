@@ -123,6 +123,23 @@ textsTab3 =
     , ("Instagram\nfilters", "Filters created\nwith Spark AR Studio")
     ]
 
+imagesTab5 : List String
+imagesTab5 =
+    List.map (\image -> "assets/tab5/" ++ image ++ "/" ++ image)
+        [ 
+          "liz"
+        , "liz2"
+        , "donatello"
+        ]
+
+textsTab5 : Texts
+textsTab5 =
+  [ 
+      ("Liz\nAO Fanart", "3D model of After Order\ncharacter Liz")
+    , ("", "Software used; blender\n80 hour project")
+    , ("Donatello", "3D scuplt on Z-brush")
+    ]
+
 
 embeddedTab4 : Device -> List String
 embeddedTab4 device =
@@ -242,7 +259,7 @@ toObjectFit size =
 -- example-1280.jpg 1280w, example-1920.avif 1920w, example-2560.webp 2560w">
 srcSet : Image.Url -> String
 srcSet image =
-    List.map (\suffix -> image ++ suffix) (crossProduct ["or", "lg", "md"] ["avif", "webp", "jpg"])
+    List.map (\suffix -> image ++ suffix) (crossProduct ["xl", "l", "m", "s", "xs", "xxs"] ["avif", "webp", "jpg"])
         |> String.join ", "
     
 
@@ -253,20 +270,20 @@ crossProduct sizes formats =
 sizeWidth : String -> String
 sizeWidth size =
     case size of 
-        "or" ->
-            "2560w"
-        "lg" ->
-            "1920w"
-        "md" ->
-            "1280w"
-        "sm" ->
-            "1024w"
-        "xs" ->
+        "xl" ->
+            "1618w"
+        "l" ->
+            "1080w"
+        "m" ->
+            "720w"
+        "s" ->
             "640w"
+        "xs" ->
+            "480w"
         "xxs" ->
             "320w"
         _ ->
-            "1280w"
+            "720w"
 
 linkToPage : Device -> List ( String, Html Gallery.Msg )
 linkToPage  device = 

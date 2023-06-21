@@ -113,17 +113,17 @@ toCssTranslate : Int -> Int -> Int -> Int -> String
 toCssTranslate slideCount index_ x y =
     "-webkit-transform: "
         ++ "translate(0px,"
-        ++ String.fromFloat (toFloat index_ * (80 / toFloat slideCount))
+        ++ String.fromFloat (toFloat index_ * (75 / toFloat slideCount))
         ++ "vh);"
     ++
     "-moz-transform: "
         ++ "translate(0px,"
-        ++ String.fromFloat (toFloat index_ * (80 / toFloat slideCount))
+        ++ String.fromFloat (toFloat index_ * (75 / toFloat slideCount))
         ++ "vh);"
     ++
     "transform: "
         ++ "translate(0px,"
-        ++ String.fromFloat (toFloat index_ * (80 / toFloat slideCount))
+        ++ String.fromFloat (toFloat index_ * (75 / toFloat slideCount))
         ++ "vh);"
 
 

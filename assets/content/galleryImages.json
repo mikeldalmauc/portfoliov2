@@ -8,16 +8,28 @@
       ],
       "breakpoints": [
       {
-        "name": "or",
+        "name": "xl",
         "size": "1618"
       },
       {
-        "name": "lg",
-        "size": "1200"
+        "name": "l",
+        "size": "1080"
       },
       {
-        "name": "md",
-        "size": "800"
+        "name": "m",
+        "size": "720"
+      },
+      {
+        "name": "s",
+        "size": "640"
+      },
+      {
+        "name": "xs",
+        "size": "480"
+      },
+      {
+        "name": "xxs",
+        "size": "320"
       }
       ],
       "images": [
