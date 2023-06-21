@@ -7,7 +7,7 @@
   <link rel="icon" href="assets/favicon.svg">
 
   <meta property="og:title" content="Mikel Dalmau">
-  <meta name="description" content="Image Engineer">
+  <meta name="description" content="Engineer">
   <meta property="og:type" content="website">
 
   <!-- TODO cambiar miniatura al final del proy  ¿En que contexto sirve ver la steve?-->
@@ -18,12 +18,12 @@
 
   <meta property="og:site_name" content="http://mikel">
   <meta property="og:url" content="http://mikeldalmau.com">
-  <meta itemprop="name" content="Image Engineer">
-  <meta itemprop="description" content="MImage Engineer">
+  <meta itemprop="name" content="Engineer">
+  <meta itemprop="description" content="Engineer">
   <meta name="author" content="Mikel Dalmau">
 
   <script src="main.js"></script>
-  <title>Mikel Dalmau Image Engineer</title>
+  <title>Mikel Dalmau - Engineer</title>
   <style>
     #app{
       overscroll-behavior-x: none;
@@ -64,6 +64,10 @@
           if(!ev.ctrlKey){
             app.ports.onWheel.send(ev);
           }
+        });
+
+        window.addEventListener("orientationchange", function() {
+          location.reload();
         });
 
     </script>

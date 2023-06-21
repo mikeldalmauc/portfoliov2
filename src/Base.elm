@@ -24,6 +24,9 @@ type alias LayoutConf =
     , arrowHeight : Int
     , arrowWidth : Int
     , arrowPadding : Int
+    , aboutFontSize : Int
+    , aboutLinkFontSize : Int
+    , aboutWidth : Int
     , tab0TitleFontSize : Int
     , tab0SubTitleFontSize : Int
     , tabWidthPortion : Int
@@ -34,6 +37,8 @@ type alias LayoutConf =
     , linksRightDisplacement : Float
     , githubSize : Int
     , igSize : Int
+    , instragramEmbeddingMaxWidth : Int
+    , instragramEmbeddingMinWidth : Int
     }
 
 layoutConf : Device -> LayoutConf
@@ -56,6 +61,9 @@ layoutConf device =
                 , arrowHeight = 60
                 , arrowWidth = 20
                 , arrowPadding = 45
+                , aboutFontSize = 35
+                , aboutLinkFontSize = 14
+                , aboutWidth = 1000
                 , tab0TitleFontSize = 60
                 , tab0SubTitleFontSize = 22
                 , tabWidthPortion = 14
@@ -66,6 +74,8 @@ layoutConf device =
                 , linksRightDisplacement = 200.0
                 , githubSize = 32
                 , igSize = 64
+                , instragramEmbeddingMaxWidth = 540
+                , instragramEmbeddingMinWidth = 150
                 }
             Phone -> 
                 { fontSize=30
@@ -77,7 +87,10 @@ layoutConf device =
                 , vSliderWidthFactor = 1
                 , arrowHeight = 30
                 , arrowWidth = 10
-                , arrowPadding = 20
+                , arrowPadding = 0
+                , aboutFontSize = 8
+                , aboutLinkFontSize = 6
+                , aboutWidth = 600
                 , tab0TitleFontSize = 40
                 , tab0SubTitleFontSize = 18
                 , tabWidthPortion = 16
@@ -88,6 +101,8 @@ layoutConf device =
                 , linksRightDisplacement = 70.0
                 , githubSize = 16
                 , igSize = 32
+                , instragramEmbeddingMaxWidth = 200
+                , instragramEmbeddingMinWidth = 150
                 }
             _ ->
                 { fontSize=70
@@ -100,6 +115,9 @@ layoutConf device =
                 , arrowHeight = 60
                 , arrowWidth = 20
                 , arrowPadding = 45
+                , aboutFontSize = 30
+                , aboutLinkFontSize = 14
+                , aboutWidth = 450
                 , tab0TitleFontSize = 60
                 , tab0SubTitleFontSize = 22
                 , tabWidthPortion = 14
@@ -110,6 +128,8 @@ layoutConf device =
                 , linksRightDisplacement = 200.0
                 , githubSize = 32
                 , igSize = 64
+                , instragramEmbeddingMaxWidth = 425
+                , instragramEmbeddingMinWidth = 256
                 }
 
 

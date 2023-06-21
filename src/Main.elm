@@ -34,14 +34,14 @@ import Html exposing (p)
 
 type alias Model =
 
-    { tab : Int
-    , tabState : TabState
-    , justChangedTab : Bool
-    , device : Device
+    { device : Device
     , dimensions : Flags
     , wheelModel : WheelModel
     , gesture : Swipe.Gesture
-
+    , justChangedTab : Bool
+    , tab : Int
+    , tabState : TabState
+    , about : AboutModalState
     , galleryTab1 : GalleryState
     , galleryTab2 : GalleryState
     , galleryTab3 : GalleryState
@@ -68,6 +68,10 @@ type TabState
     = Loading
     | Loaded
 
+type AboutModalState
+    = Visible
+    | Hidden
+
 type Msg =
       Wheel WheelModel
     | Swipe Swipe.Event
@@ -78,21 +82,23 @@ type Msg =
     | ToTab Int
     | GalleryMsg Gallery.Msg
     | DeviceClassified Flags
+    | ToggleAbout
     | NoOp
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     ({    tab = 0
-        , tabState = Loaded
         , justChangedTab = False
         , device = Element.classifyDevice flags
         , dimensions = flags
         , wheelModel = initWheelModel
         , gesture = Swipe.blanco
+        , about = Hidden
+        , tabState = Loaded
         , galleryTab1 = initGalleryState (List.length ViewTab.imagesTab1)
         , galleryTab2 = initGalleryState (List.length ViewTab.imagesTab2)
         , galleryTab3 = initGalleryState (List.length ViewTab.imagesTab3)
-        , galleryTab4 = initGalleryState (List.length ViewTab.embeddedTab4)
+        , galleryTab4 = initGalleryState (List.length <| ViewTab.embeddedTab4 <| Element.classifyDevice flags)
     }
     , Cmd.none
     )
@@ -106,88 +112,110 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg modelPrev =
     let
         model = {modelPrev | justChangedTab = False}
+
+        updateIfAboutHidden : (Model, Cmd Msg) -> (Model, Cmd Msg)
+        updateIfAboutHidden = \action -> 
+            case model.about of
+                Visible -> 
+                    (model, Cmd.none)
+                Hidden -> 
+                    action
+
     in
         case msg of
             {-
                 NAVIGATION messages
             -} 
             HandleKeyboardEvent event -> 
-                case event.keyCode of
-                    Key.Right ->  
-                        case (actualGallery model) of
-                            Just galleryState -> 
-                                (updateGallery 
-                                    { image =Gallery.next galleryState.image
-                                    , links = Gallery.next galleryState.links
-                                    , text = Gallery.next galleryState.text} 
-                                    model, Cmd.none)
-                            Nothing -> 
-                                ( model, Cmd.none )
-                    Key.Left ->  
-                        case (actualGallery model) of
-                            Just galleryState -> 
-                                (updateGallery
-                                { image =Gallery.previous galleryState.image
-                                , links = Gallery.previous galleryState.links
-                                , text = Gallery.previous galleryState.text} 
-                                 model, Cmd.none)
-                            Nothing -> 
-                                ( model, Cmd.none )
+                updateIfAboutHidden
+                    <|  case event.keyCode of
+                            Key.Right ->  
+                                case (actualGallery model) of
+                                    Just galleryState -> 
+                                        (updateGallery 
+                                            { image =Gallery.next galleryState.image
+                                            , links = Gallery.next galleryState.links
+                                            , text = Gallery.next galleryState.text} 
+                                            model, Cmd.none)
+                                    Nothing -> 
+                                        ( model, Cmd.none )
+                            Key.Left ->  
+                                case (actualGallery model) of
+                                    Just galleryState -> 
+                                        (updateGallery
+                                        { image =Gallery.previous galleryState.image
+                                        , links = Gallery.previous galleryState.links
+                                        , text = Gallery.previous galleryState.text} 
+                                        model, Cmd.none)
+                                    Nothing -> 
+                                        ( model, Cmd.none )
 
-                    Key.Up -> 
-                        ( model , Cmd.batch [toTab <| previousTab model.tab])
-                    Key.Down ->  
-                        ( model , Cmd.batch [toTab <| nextTab model.tab] )
-                    _ -> 
-                        (model, Cmd.none)
+                            Key.Up -> 
+                                ( model , Cmd.batch [toTab <| previousTab model.tab])
+                            Key.Down ->  
+                                ( model , Cmd.batch [toTab <| nextTab model.tab] )
+                            _ -> 
+                                (model, Cmd.none)
                                 
 
             Wheel wheelModel ->
-                case model.tabState of
-                    Loading -> 
-                        ( model, Cmd.none )
-                    Loaded -> 
-                        if  wheelModel.deltaY < 0.0 then                       
-                            ( {model |  wheelModel = initWheelModel} , Cmd.batch [toTab <| previousTab model.tab])
-                        else
-                            ( {model | wheelModel = initWheelModel} , Cmd.batch [toTab <| nextTab model.tab] )
+                updateIfAboutHidden
+                    <|  case model.tabState of
+                            Loading -> 
+                                ( model, Cmd.none )
+                            Loaded -> 
+                                if  wheelModel.deltaY < 0.0 then                       
+                                    ( {model |  wheelModel = initWheelModel} , Cmd.batch [toTab <| previousTab model.tab])
+                                else
+                                    ( {model | wheelModel = initWheelModel} , Cmd.batch [toTab <| nextTab model.tab] )
             
             ToTab tab ->
                 ( {model | tab = tab, justChangedTab = True} , Cmd.none )
                 
             Swipe touch ->
-                ({ model | gesture = Swipe.record touch model.gesture }, Cmd.none)
+                updateIfAboutHidden
+                    <|  ({ model | gesture = Swipe.record touch model.gesture }, Cmd.none)
                         
             SwipeEnd touch ->
-                let
-                    gesture = Swipe.record touch model.gesture
-                in
-                    if (Swipe.isUpSwipe 100.0 gesture) then
-                        ({ model | gesture = Swipe.blanco}, Cmd.batch [toTab <| nextTab model.tab])
-                    else if (Swipe.isDownSwipe 100.0 gesture) then
-                        ({ model | gesture = Swipe.blanco}, Cmd.batch [toTab <| previousTab model.tab])
-                    else
-                        ({ model | gesture = Swipe.blanco}, Cmd.none)
+                updateIfAboutHidden
+                    <|  let
+                            gesture = Swipe.record touch model.gesture
+                        in
+                            if (Swipe.isUpSwipe 100.0 gesture) then
+                                ({ model | gesture = Swipe.blanco}, Cmd.batch [toTab <| nextTab model.tab])
+                            else if (Swipe.isDownSwipe 100.0 gesture) then
+                                ({ model | gesture = Swipe.blanco}, Cmd.batch [toTab <| previousTab model.tab])
+                            else
+                                ({ model | gesture = Swipe.blanco}, Cmd.none)
 
             UserMovedSlider v ->
-                (model, Cmd.batch [toTab (v // 10)])
+                updateIfAboutHidden
+                    <|  (model, Cmd.batch [toTab (v // 10)])
 
             DeviceClassified flags ->
                 ( { model | device = (Element.classifyDevice flags), dimensions = flags } , Cmd.none)
 
             GalleryMsg galleryMsg ->
-                case (actualGallery model) of
-                    Just galleryState -> 
-                        (updateGallery
-                         { image =Gallery.update galleryMsg galleryState.image
-                        , links = Gallery.update galleryMsg  galleryState.links
-                        , text = Gallery.update galleryMsg galleryState.text}  
-                         model, Cmd.none)
-                    Nothing -> 
-                        ( model, Cmd.none )
+                updateIfAboutHidden
+                    <|  case (actualGallery model) of
+                            Just galleryState -> 
+                                (updateGallery
+                                { image =Gallery.update galleryMsg galleryState.image
+                                , links = Gallery.update galleryMsg  galleryState.links
+                                , text = Gallery.update galleryMsg galleryState.text}  
+                                model, Cmd.none)
+                            Nothing -> 
+                                ( model, Cmd.none )
 
             Head -> 
                 ( model , Cmd.batch [toTab 0] )
+
+            ToggleAbout ->  
+                case model.about of
+                    Visible -> 
+                        ( { model | about = Hidden } , Cmd.none )
+                    Hidden -> 
+                        ( { model | about = Visible } , Cmd.none )
 
             NoOp ->
                 ( model, Cmd.none )
@@ -261,30 +289,6 @@ view model =
                 desktopLayout model
             BigDesktop ->
                 desktopLayout model
-    -- Html.div 
-        -- [ Swipe.onStart Swipe
-        -- , Swipe.onMove Swipe
-        -- , Swipe.onEndWithOptions 
-        --     { stopPropagation = True
-        --     , preventDefault = False
-        --     } 
-        --     SwipeEnd
-        -- ]
-        -- [ bigDesktopLayout model ]
-
-        {-
-              if shortSide < 600 then
-            Phone
-
-        else if longSide <= 1200 then
-            Tablet
-
-        else if longSide > 1200 && longSide <= 1920 then
-            Desktop
-
-        else
-            BigDesktop
-        -}
 
 phoneLayout : Model -> Html Msg
 phoneLayout model = 
@@ -297,7 +301,9 @@ phoneLayout model =
         case deviceOrientation of
                 Portrait ->
                     layout
-                        [ width fill, height fill, Background.color black08 ]
+                        [ width fill, height fill, Background.color black08 
+                                        -- , behindContent <| infoDebug model -- TODO hide maybeÇ
+                        ]
                         <| el (brandFontAttrs ++ [centerX, centerY, Font.color highlight, Font.center] )
                         <| text "Turn your device\n horizontally"
 
@@ -305,22 +311,22 @@ phoneLayout model =
                     let 
                         conf = layoutConf model.device
 
-                        name = el (brandFontAttrs ++ [ width fill, height <| fillPortion 1, centerX, Font.color <| gray50] ) 
+                        name = \hidden -> el (brandFontAttrs ++ [ transparent hidden, width fill, height <| fillPortion 1, centerX, Font.color <| gray50] ) 
                             <| paragraph [ Font.center, centerY, Font.size 20, padding 10, onClick Head] [ text "Mikel Dalmau" ]
 
                         attrs = (secondaryFontAttrs ++ [height fill, Font.size 10, Font.color <| gray80, mouseOver [Font.color <| highlight]])
-                        menuL = el (attrs ++ [alignLeft, width (fillPortion 1)]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick Head, pointer] <| [ text "About"]
-                        menuR = el (attrs ++ [alignRight, width <| px 120]) <| paragraph [Font.center, centerY, rotate <| degrees -90, pointer] <| [
+                        menuL = \hidden -> el (attrs ++ [transparent hidden, alignLeft, width (fillPortion 1)]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [ text "About"]
+                        menuR = \hidden -> el (attrs ++ [transparent hidden, alignRight, width <| px 120]) <| paragraph [Font.center, centerY, rotate <| degrees -90, pointer] <| [
                             link []
                                 { url = partnerMailto
                                 , label = text "mikeldalmauc@gmail.com"}
                             ]
-                        slider = 
+                        slider = \hidden ->
                             if model.tab > 0 then 
-                                el [width <| fillPortion conf.vSliderWidthFactor, height fill, onRight 
+                                el [transparent hidden, width <| fillPortion conf.vSliderWidthFactor, height fill, onRight 
                                     <| Slider.phoneSlider model.tab (List.length tabs - 1)] none
                             else
-                                el [width <| fillPortion conf.vSliderWidthFactor, height fill] none
+                                el [transparent hidden, width <| fillPortion conf.vSliderWidthFactor, height fill] none
 
                         spaces = if model.tab == 0 then 
                                 [ el [width <| fillPortion 2, height fill] none
@@ -330,21 +336,41 @@ phoneLayout model =
                                 , el [width <| fillPortion 2, height fill] none
                                 , el [width <| fillPortion 2, height fill] none
                                 , el [width <| fillPortion 2, height fill] none]
+
+                        about = 
+                            case model.about of
+                                Hidden ->
+                                    []   
+                                Visible ->
+                                    [ inFront <| 
+                                        column
+                                            [ height fill, width fill]
+                                            [ name True
+                                            , row
+                                                [ height <| fillPortion 18, width fill, spaceEvenly]
+                                                [ el (attrs ++ [alignLeft]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [ text "Close"] 
+                                                -- , el [width <| fillPortion 2, height fill] none
+                                                , viewTab Visible model
+                                                , slider True
+                                                , menuR False]
+                                            , el [height <| fillPortion 1] none
+                                            ]
+                                    ]
                     in
                         layout
-                            [ width fill, height fill, Background.color black08
+                            (about ++ [ width fill, height fill, Background.color black08
                                 -- , behindContent <| infoDebug model -- TODO hide maybeÇ
                                 -- , Element.explain Debug.todo
-                            ]
+                            ])
                             <|  column
-                                [ height fill, width fill]
-                                [ name
+                                ((reduceOpacityWhenBehind model.about) ++ [ height fill, width fill])
+                                [ name False
                                 , row
                                     [ height <| fillPortion 8, width fill]
-                                    (  menuL :: spaces ++ 
-                                    [ viewTab model
-                                    , slider
-                                    , menuR ])
+                                    ( (menuL <| model.about == Visible) :: spaces ++ 
+                                    [ viewTab Hidden model
+                                    , slider False
+                                    , menuR False])
                                 , el [height <| fillPortion 1] none
                                 ]
                         
@@ -356,43 +382,68 @@ desktopLayout model =
         
         conf = layoutConf model.device
 
-        name = el (brandFontAttrs ++ [ width fill, height <| fillPortion 1, centerX, Font.color <| gray50, mouseOver [Font.color <| highlight]  ]) 
+        name = \hidden -> el (brandFontAttrs ++ [ transparent hidden, width fill, height <| fillPortion 1, centerX, Font.color <| gray50, mouseOver [Font.color <| highlight]  ]) 
             <| paragraph [ Font.center, centerY, Font.size 20, padding 40, onClick Head, pointer] [ text "Mikel Dalmau" ]
 
         attrs = (secondaryFontAttrs ++ [width (fillPortion 2), height fill, Font.size 12, Font.color <| gray80, mouseOver [Font.color <| highlight]])
-        menuL = el (attrs ++ [alignLeft]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick Head, pointer] <| [ text "About"]
-        menuR = el (attrs ++ [alignRight]) <| paragraph [Font.center, centerY, rotate <| degrees -90, pointer] <| [
+        menuL = \hidden -> el (attrs ++ [ transparent hidden, alignLeft]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [ text "About"]
+        menuR = \hidden -> el (attrs ++ [ transparent hidden, alignRight]) <| paragraph [Font.center, centerY, rotate <| degrees -90, pointer] <| [
             link []
                 { url = partnerMailto
                 , label = text "mikeldalmauc@gmail.com"}
             ]
             
         -- Slider definition
-        slider = if model.tab > 0 then 
-                    el [width <| fillPortion conf.vSliderWidthFactor, height fill, onRight 
+        slider = \hidden ->
+                if model.tab > 0 then 
+                    el [transparent hidden, width <| fillPortion conf.vSliderWidthFactor, height fill, onRight 
                         <| Slider.tabsSlider model.tab (List.length tabs - 1) (ToTab (previousTab model.tab)) (ToTab (previousTab model.tab))] none
                 else
-                    el [width <| fillPortion conf.vSliderWidthFactor, height fill] none
+                    el [transparent hidden, width <| fillPortion conf.vSliderWidthFactor, height fill] none
+        
+        about = 
+            case model.about of
+                Hidden ->
+                    []   
+                Visible ->
+                    [ inFront <| 
+                        column
+                            [ height fill, width fill]
+                            [ name False
+                            , row
+                                [ height <| fillPortion 18, width fill, spaceEvenly]
+                                [ el (attrs ++ [alignLeft]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [ text "Close"] 
+                                -- , el [width <| fillPortion 2, height fill] none
+                                , viewTab Visible model
+                                , slider True
+                                , menuR False]
+                            , el [height <| fillPortion 1] none
+                            ]
+                    ]
     in 
         layout
-            [ width fill, height fill, Background.color black08
+            (about ++ [ width fill, height fill, Background.color black08
                 -- , behindContent <| infoDebug model -- TODO hide maybeÇ
                 -- , Element.explain Debug.todo
-            ]
+         
+            ])
             <|  column
-                [ height fill, width fill]
-                [ name
+                ((reduceOpacityWhenBehind model.about) ++ [ height fill, width fill])
+                [ name <| model.about == Visible
                 , row
                     [ height <| fillPortion 18, width fill, spaceEvenly]
-                    [  menuL
+                    [ menuL <| model.about == Visible
                     , el [width <| fillPortion 2, height fill] none
-                    , viewTab model
-                    , slider
-                    , menuR]
+                    , viewTab Hidden model
+                    , slider False
+                    , menuR False]
                 , el [height <| fillPortion 1] none
                 ]
 
 
+reduceOpacityWhenBehind : AboutModalState -> List (Attribute msg)
+reduceOpacityWhenBehind about =
+    if about == Hidden then [] else [htmlAttribute (Attrs.attribute "style" "filter: opacity(0.02);")]
 
 infoDebug : Model -> Element msg
 infoDebug model =
@@ -412,8 +463,8 @@ tabs : List (Model -> Element Msg )
 tabs = 
     [viewTab0, viewTab1, viewTab2, viewTab3, viewTab4]
     
-viewTab : Model -> Element Msg
-viewTab model =
+viewTab : AboutModalState -> Model -> Element Msg
+viewTab about model =
     let 
         conf = layoutConf model.device
 
@@ -425,12 +476,16 @@ viewTab model =
             Phone ->  height (fillPortion conf.tabHeightPortion)
             _ -> height (fillPortion conf.tabHeightPortion)
 
-    in
-        case (head <| drop model.tab tabs ) of
-            Just tab ->
-                el [width (fillPortion conf.tabWidthPortion), heightFp] <| tab model
-            Nothing ->
-                el [width (fillPortion conf.tabWidthPortion), heightFp] <| viewTab1 model
+    in  
+        case about of
+            Hidden ->
+                case (head <| drop model.tab tabs ) of
+                    Just tab ->
+                        el (reduceOpacityWhenBehind model.about ++ [width (fillPortion conf.tabWidthPortion), heightFp]) <| tab model
+                    Nothing ->
+                        el (reduceOpacityWhenBehind model.about ++ [width (fillPortion conf.tabWidthPortion), heightFp]) <| viewTab1 model
+            Visible ->
+                el [width (fillPortion conf.tabWidthPortion), heightFp] <| viewAbout model
 
 nextTab : Int -> Int
 nextTab actual  =   
@@ -447,6 +502,37 @@ previousTab actual  =
         actual - 1
         
 
+viewAbout : Model -> Element Msg
+viewAbout model =
+    let
+        
+        conf = layoutConf model.device
+
+    in
+        el [  height fill, centerY, Background.color <| rgba 0.0 0.0 0.0 0.0] 
+            <|
+                column
+                [centerY, width <| fillPortion 2, Font.color <| rgb 255 255 255, spacing 10]
+                [ Element.textColumn [padding 10, spacing 40, width <| px conf.aboutWidth] 
+                    [paragraph
+                        (secondaryFontAttrs ++ [Font.size conf.aboutFontSize, Font.alignLeft])
+                        [ text """Born and raised in the Basque Country. Educated at University of the Basque County on Software Engineering. Former engineer 
+                        at QAD, Sopra Steria and Everis. Currenty teaching web development and electronics at rofessional training schools."""]
+                    ,paragraph
+                        (secondaryFontAttrs ++ [Font.size conf.aboutFontSize, Font.alignLeft])
+                        [ text """Apart from programming my main passion is art as this site can show. I have been drawing and painting the last years in my free time.
+                        I would love to be able to live from art and teaching while never stopping to programm as i consider it another mean of expression."""]
+                    ,paragraph
+                        (secondaryFontAttrs ++ [Font.size conf.aboutLinkFontSize, Font.alignLeft, pointer, Font.color Base.gray50, spacing 10])
+                        [link [Font.underline, padding 5] { url = "https://www.instagram.com/mikel_dalmau_art/", label = text "Instagram"} 
+                        , text "             "
+                        , link [Font.underline, padding 5] { url = "https://www.linkedin.com/in/mkldalmau/", label = text "LinedIn" }
+                        , text "             "
+                        , link [Font.underline, padding 5] { url = "https://github.com/mikeldalmauc/portfoliov2", label = text "This website source"}
+                        ]
+                    ]
+                , el [width <| px 600, transparent True] <| text "sss"
+                ]
 
 
 viewTab0 : Model -> Element Msg 
@@ -471,9 +557,17 @@ viewTab0 model =
                 [ paragraph
                         (brandFontAttrs ++ [Font.size conf.tab0TitleFontSize, Font.center ])
                         [ text "Mikel Dalmau" ]
-                , paragraph
+                , Element.textColumn [padding 10, spacing 10] 
+                    [paragraph
                         (baseFontAttrs ++ [Font.size conf.tab0SubTitleFontSize, Font.center])
-                        [ text "Image engineer"]
+                        [ text "Software Engineer"]
+                    ,paragraph
+                        (baseFontAttrs ++ [Font.size conf.tab0SubTitleFontSize, Font.center])
+                        [ text "&"]
+                    ,paragraph
+                        (baseFontAttrs ++ [Font.size conf.tab0SubTitleFontSize, Font.center])
+                        [ text "Artist"]
+                    ]
                 ]
 
 
@@ -495,7 +589,7 @@ viewTab3 model =
 
 viewTab4 : Model -> Element Msg
 viewTab4 model = 
-    viewSliderTab model.justChangedTab Nothing (Just ViewTab.embeddedTab4) Nothing ViewTab.textsTab4 model.dimensions model.device model.galleryTab4
+    viewSliderTab model.justChangedTab Nothing (Just <| ViewTab.embeddedTab4 model.device) Nothing ViewTab.textsTab4 model.dimensions model.device model.galleryTab4
 
 
 viewSliderTab : Bool -> Maybe (Device -> List ( String, Html Gallery.Msg )) -> Maybe (List String)  -> Maybe (List String) -> ViewTab.Texts -> Flags -> Device -> GalleryState -> Element Msg

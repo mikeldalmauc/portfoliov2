@@ -102,6 +102,8 @@ phoneSlider actual positions =
 styleSheet :  String
 styleSheet  =
     """            
+       transition: -webkit-transform 400ms ease;
+       transition: -moz-transform 400ms ease;
        transition: transform 400ms ease;
     """
         
@@ -109,12 +111,17 @@ styleSheet  =
 
 toCssTranslate : Int -> Int -> Int -> Int -> String
 toCssTranslate slideCount index_ x y =
+    "-webkit-transform: "
+        ++ "translate(0px,"
+        ++ String.fromFloat (toFloat index_ * (80 / toFloat slideCount))
+        ++ "vh);"
+    ++
+    "-moz-transform: "
+        ++ "translate(0px,"
+        ++ String.fromFloat (toFloat index_ * (80 / toFloat slideCount))
+        ++ "vh);"
+    ++
     "transform: "
-    -- translate3d("
-    --     ++ String.fromFloat (toFloat index_ * (100 / toFloat slideCount))
-    --     ++ "%, "
-    --     ++ String.fromInt y
-    --     ++ "px, 0) "
         ++ "translate(0px,"
         ++ String.fromFloat (toFloat index_ * (80 / toFloat slideCount))
         ++ "vh);"
@@ -124,12 +131,17 @@ toCssTranslate slideCount index_ x y =
 
 toCssTranslatePhone : Int -> Int -> Int -> Int -> String
 toCssTranslatePhone slideCount index_ x y =
+    "-webkit-transform: "
+        ++ "translate(0px,"
+        ++ String.fromFloat (toFloat index_ * (70 / toFloat slideCount))
+        ++ "vh);"
+    ++
+    "-moz-transform: "
+        ++ "translate(0px,"
+        ++ String.fromFloat (toFloat index_ * (70 / toFloat slideCount))
+        ++ "vh);"
+    ++
     "transform: "
-    -- translate3d("
-    --     ++ String.fromFloat (toFloat index_ * (100 / toFloat slideCount))
-    --     ++ "%, "
-    --     ++ String.fromInt y
-    --     ++ "px, 0) "
         ++ "translate(0px,"
         ++ String.fromFloat (toFloat index_ * (70 / toFloat slideCount))
         ++ "vh);"
