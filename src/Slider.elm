@@ -9,12 +9,13 @@ import Html.Attributes as Attrs
 import Element.Border as Border
 import Html exposing (input)
 
-tabsSlider : Int -> Int -> msg -> msg -> Element msg
-tabsSlider actual positions prev next = 
+tabsSlider :  Device -> Int -> Int -> msg -> msg -> Element msg
+tabsSlider device actual positions prev next = 
     let
+        conf = Base.layoutConf device
         margin = (toFloat actual - 1) / (toFloat positions - 1) *80 |> round
-       
-        translate = toCssTranslate (positions - 1) (actual - 1) 0 0
+
+        translate = toCssTranslate conf.vSliderPointerTranslate (positions - 1) (actual - 1) 0 0
         buttonAttrs = [
                   pointer
                 , Background.color Base.black08
@@ -62,8 +63,8 @@ tabsSlider actual positions prev next =
         ] <| thumb 
     
 
-phoneSlider : Int -> Int -> Element msg
-phoneSlider actual positions = 
+phoneSlider : Device -> Int -> Int -> Element msg
+phoneSlider device actual positions = 
     let       
         translate = toCssTranslatePhone (positions - 1) (actual - 1) 0 0
 
@@ -109,21 +110,21 @@ styleSheet  =
         
 
 
-toCssTranslate : Int -> Int -> Int -> Int -> String
-toCssTranslate slideCount index_ x y =
+toCssTranslate : Int -> Int -> Int -> Int -> Int -> String
+toCssTranslate vSliderPointerTranslate slideCount index_ x y =
     "-webkit-transform: "
         ++ "translate(0px,"
-        ++ String.fromFloat (toFloat index_ * (75 / toFloat slideCount))
+        ++ String.fromFloat (toFloat index_ * (toFloat vSliderPointerTranslate / toFloat slideCount))
         ++ "vh);"
     ++
     "-moz-transform: "
         ++ "translate(0px,"
-        ++ String.fromFloat (toFloat index_ * (75 / toFloat slideCount))
+        ++ String.fromFloat (toFloat index_ * (toFloat vSliderPointerTranslate / toFloat slideCount))
         ++ "vh);"
     ++
     "transform: "
         ++ "translate(0px,"
-        ++ String.fromFloat (toFloat index_ * (75 / toFloat slideCount))
+        ++ String.fromFloat (toFloat index_ * (toFloat vSliderPointerTranslate / toFloat slideCount))
         ++ "vh);"
 
 
@@ -133,15 +134,15 @@ toCssTranslatePhone : Int -> Int -> Int -> Int -> String
 toCssTranslatePhone slideCount index_ x y =
     "-webkit-transform: "
         ++ "translate(0px,"
-        ++ String.fromFloat (toFloat index_ * (70 / toFloat slideCount))
+        ++ String.fromFloat (toFloat index_ * (60 / toFloat slideCount))
         ++ "vh);"
     ++
     "-moz-transform: "
         ++ "translate(0px,"
-        ++ String.fromFloat (toFloat index_ * (70 / toFloat slideCount))
+        ++ String.fromFloat (toFloat index_ * (60 / toFloat slideCount))
         ++ "vh);"
     ++
     "transform: "
         ++ "translate(0px,"
-        ++ String.fromFloat (toFloat index_ * (70 / toFloat slideCount))
+        ++ String.fromFloat (toFloat index_ * (60 / toFloat slideCount))
         ++ "vh);"

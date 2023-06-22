@@ -307,7 +307,8 @@ phoneLayout model =
         case deviceOrientation of
                 Portrait ->
                     layout
-                        [ width fill, height fill, Background.color black08 
+                        [ width fill, height fill,
+                            if model.tab == 0 then (Background.color <| rgba 0 0 0 0) else Background.color black08
                                         -- , behindContent <| infoDebug model -- TODO hide maybeÇ
                         ]
                         <| el (brandFontAttrs ++ [centerX, centerY, Font.color highlight, Font.center] )
@@ -330,7 +331,7 @@ phoneLayout model =
                         slider = \hidden ->
                             if model.tab > 0 then 
                                 el [transparent hidden, width <| fillPortion conf.vSliderWidthFactor, height fill, onRight 
-                                    <| Slider.phoneSlider model.tab (List.length tabs - 1)] none
+                                    <| Slider.phoneSlider model.device model.tab (List.length tabs - 1)] none
                             else
                                 el [transparent hidden, width <| fillPortion conf.vSliderWidthFactor, height fill] none
 
@@ -364,7 +365,8 @@ phoneLayout model =
                                     ]
                     in
                         layout
-                            (about ++ [ width fill, height fill, Background.color black08
+                            (about ++ [ width fill, height fill,
+                                if model.tab == 0 then (Background.color <| rgba 0 0 0 0) else Background.color black08
                                 -- , behindContent <| infoDebug model -- TODO hide maybeÇ
                                 -- , Element.explain Debug.todo
                             ])
@@ -376,7 +378,7 @@ phoneLayout model =
                                     ( (menuL <| model.about == Visible) :: spaces ++ 
                                     [ viewTab Hidden model
                                     , slider False
-                                    , menuR False])
+                                    , menuR <| model.about == Visible])
                                 , el [height <| fillPortion 1] none
                                 ]
                         
@@ -403,7 +405,7 @@ desktopLayout model =
         slider = \hidden ->
                 if model.tab > 0 then 
                     el [transparent hidden, width <| fillPortion conf.vSliderWidthFactor, height fill, onRight 
-                        <| Slider.tabsSlider model.tab (List.length tabs - 1) (ToTab (previousTab model.tab)) (ToTab (previousTab model.tab))] none
+                        <| Slider.tabsSlider model.device model.tab (List.length tabs - 1) (ToTab (previousTab model.tab)) (ToTab (previousTab model.tab))] none
                 else
                     el [transparent hidden, width <| fillPortion conf.vSliderWidthFactor, height fill] none
         
@@ -428,7 +430,8 @@ desktopLayout model =
                     ]
     in 
         layout
-            (about ++ [ width fill, height fill, Background.color black08
+            (about ++ [ width fill, height fill, 
+                if model.tab == 0 then (Background.color <| rgba 0 0 0 0) else Background.color black08
                 -- , behindContent <| infoDebug model -- TODO hide maybeÇ
                 -- , Element.explain Debug.todo
          
@@ -442,14 +445,14 @@ desktopLayout model =
                     , el [width <| fillPortion 2, height fill] none
                     , viewTab Hidden model
                     , slider False
-                    , menuR False]
+                    , menuR <| model.about == Visible]
                 , el [height <| fillPortion 1] none
                 ]
 
 
 reduceOpacityWhenBehind : AboutModalState -> List (Attribute msg)
 reduceOpacityWhenBehind about =
-    if about == Hidden then [] else [htmlAttribute (Attrs.attribute "style" "filter: opacity(0.02);")]
+    if about == Hidden then [] else [htmlAttribute (Attrs.attribute "style" "filter: opacity(0.2);")]
 
 infoDebug : Model -> Element msg
 infoDebug model =
@@ -458,10 +461,10 @@ infoDebug model =
         [ text <| "wheel Delta Y: " ++ fromFloat model.wheelModel.deltaY
         , text <| "wheel Delta X: " ++ fromFloat model.wheelModel.deltaX
         , text <| "tab: " ++ fromInt model.tab
-        , text <| "device: " ++ Debug.toString model.device
-        , text <| "dimensions: " ++ Debug.toString model.dimensions
-        , text <| "galleryTab1: " ++ Debug.toString model.galleryTab1
-        , text <| "gesture: " ++ Debug.toString model.gesture
+        -- , text <| "device: " ++ Debug.toString model.device
+        -- , text <| "dimensions: " ++ Debug.toString model.dimensions
+        -- , text <| "galleryTab1: " ++ Debug.toString model.galleryTab1
+        -- , text <| "gesture: " ++ Debug.toString model.gesture
         ]
 
 
@@ -515,7 +518,7 @@ viewAbout model =
         conf = layoutConf model.device
 
     in
-        el [  height fill, centerY, Background.color <| rgba 0.0 0.0 0.0 0.0] 
+        el [  height fill, centerY] 
             <|
                 column
                 [centerY, width <| fillPortion 2, Font.color <| rgb 255 255 255, spacing 10]
@@ -523,7 +526,7 @@ viewAbout model =
                     [paragraph
                         (secondaryFontAttrs ++ [Font.size conf.aboutFontSize, Font.alignLeft])
                         [ text """Born and raised in the Basque Country. Educated at University of the Basque County on Software Engineering. Former engineer 
-                        at QAD, Sopra Steria and Everis. Currenty teaching web development and electronics at rofessional training schools."""]
+                        at QAD, Sopra Steria and Everis. Currenty teaching web development and electronics at professional training schools."""]
                     ,paragraph
                         (secondaryFontAttrs ++ [Font.size conf.aboutFontSize, Font.alignLeft])
                         [ text """Apart from programming my main passion is art as this site can show. I have been drawing and painting the last years in my free time.

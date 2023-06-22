@@ -2,11 +2,11 @@
     "name": "test-repo",
     "version": "1.0.0",
     "description": "",
-    "main": "gulpfile.js",
+    "private": true,
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "imageOptimizerTask": "gulp imageOptimizerTask",
-        "start": "node server/server.js"
+        "start": "node app.js"
     },
     "author": "Mikel Dalmau",
     "license": "ISC",
@@ -29,6 +29,9 @@
         "gulp": "^4.0.2",
         "gulp-exec": "^5.0.0",
         "gulp-sharp-responsive": "^0.4.1",
+        "three": "^0.153.0",
+        "webpack": "^5.88.0",
+        "webpack-cli": "^5.1.4",
         "yargs": "^17.7.2"
     },
     "browserslist": [

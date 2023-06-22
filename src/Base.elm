@@ -21,6 +21,7 @@ type alias LayoutConf =
     , leftDisplacement : Float
     , upDisplacement : Float
     , vSliderWidthFactor : Int
+    , vSliderPointerTranslate : Int
     , arrowHeight : Int
     , arrowWidth : Int
     , arrowPadding : Int
@@ -58,6 +59,7 @@ layoutConf device =
                 , leftDisplacement=200.0
                 , upDisplacement=100.0
                 , vSliderWidthFactor = 2
+                , vSliderPointerTranslate = 80
                 , arrowHeight = 60
                 , arrowWidth = 20
                 , arrowPadding = 45
@@ -82,6 +84,7 @@ layoutConf device =
                 , subtitleFontSize = 20
                 , sliderWidthFactor=0.65
                 , sliderHeightFactor=0.65
+                , vSliderPointerTranslate = 60
                 , leftDisplacement=30.0
                 , upDisplacement=20.0
                 , vSliderWidthFactor = 1
@@ -112,6 +115,7 @@ layoutConf device =
                 , leftDisplacement=100.0
                 , upDisplacement=50.0
                 , vSliderWidthFactor = 1
+                , vSliderPointerTranslate = 75
                 , arrowHeight = 60
                 , arrowWidth = 20
                 , arrowPadding = 45
