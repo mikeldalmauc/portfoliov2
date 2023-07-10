@@ -319,14 +319,14 @@ phoneLayout model =
                         conf = layoutConf model.device
 
                         name = \hidden -> el (brandFontAttrs ++ [ transparent hidden, width fill, height <| fillPortion 1, centerX, Font.color <| gray50] ) 
-                            <| paragraph [ Font.center, centerY, Font.size 20, padding 10, onClick Head] [html <| animatedText "animatedSubTitle3" ["Mikel ","Dalmau"]]
+                            <| paragraph [ Font.center, centerY, Font.size 20, padding 10, onClick Head] [html <| animatedText "animatedSubTitle2" ["Mikel ","Dalmau"]]
 
                         attrs = (secondaryFontAttrs ++ [height fill, Font.size 10, Font.color <| gray80, mouseOver [Font.color <| highlight]])
-                        menuL = \hidden -> el (attrs ++ [transparent hidden, alignLeft, width (fillPortion 1)]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [html <| animatedText "animatedSubTitle3" ["About"]]
+                        menuL = \hidden -> el (attrs ++ [transparent hidden, alignLeft, width (fillPortion 1)]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [ text "About"]
                         menuR = \hidden -> el (attrs ++ [transparent hidden, alignRight, width <| px 120]) <| paragraph [Font.center, centerY, rotate <| degrees -90, pointer] <| [
                             link []
                                 { url = partnerMailto
-                                , label = html <| animatedText "animatedSubTitle3" ["mikeldalmauc@gmail.com"] }
+                                , label = text "mikeldalmauc@gmail.com"}
                             ]
                         slider = \hidden ->
                             if model.tab > 0 then 
@@ -436,7 +436,8 @@ desktopLayout model =
         backgroundAttrs = 
             if model.tab == 0 then 
                 [htmlAttribute (Attrs.attribute "style" "background: none !important;")
-                ,htmlAttribute (Attrs.attribute "style" "pointer-events: none ;")]            
+                -- ,htmlAttribute (Attrs.attribute "style" "pointer-events: none ;")
+                ]            
             else 
                 [Background.color black08]
     in 
@@ -530,7 +531,7 @@ viewAbout model =
     in
         el [  height fill, centerY 
             , htmlAttribute (Attrs.attribute "style" "background: none !important;")
-            ,htmlAttribute (Attrs.attribute "style" "pointer-events: none ;")]
+            , htmlAttribute (Attrs.attribute "style" "pointer-events: none ;")]
             <|
                 column
                 [centerY, width <| fillPortion 2, Font.color <| rgb 255 255 255, spacing 10]

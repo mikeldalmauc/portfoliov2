@@ -378,7 +378,7 @@ viewClickableSlide currentIndex slideIndex ( id, html ) =
     , div
         [ classList
             [ ( "elm-gallery-itemcontainer-clickable", True )
-            , ( "elm-gallery-current", currentIndex == slideIndex )
+            , ( "elm-gallery-clickable-current", currentIndex == slideIndex )
             ]
         ]
         [ html ]
