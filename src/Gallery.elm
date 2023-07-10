@@ -366,7 +366,7 @@ viewTextSlide currentIndex slideIndex ( id, html ) =
     , div
         [ classList
             [ ( "elm-gallery-text-itemcontainer", True )
-            , ( "elm-gallery-current", currentIndex == slideIndex )
+            , ( "elm-gallery-text-current", currentIndex == slideIndex )
             ]
         ]
         [ html ]
@@ -716,8 +716,16 @@ styleSheet (Config config_) drag =
 
             #"""
                 ++ config_.id
+                ++ """ .elm-gallery-text-current {
+                opacity: 1.0 !important;
+
+            }
+
+            #"""
+                ++ config_.id
                 ++ """ .elm-gallery-text-itemcontainer {
                 position: relative;
+                opacity: .0;
                 display: flex;
                 align-items: center;
                 width: 100%;

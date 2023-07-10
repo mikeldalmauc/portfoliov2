@@ -319,14 +319,14 @@ phoneLayout model =
                         conf = layoutConf model.device
 
                         name = \hidden -> el (brandFontAttrs ++ [ transparent hidden, width fill, height <| fillPortion 1, centerX, Font.color <| gray50] ) 
-                            <| paragraph [ Font.center, centerY, Font.size 20, padding 10, onClick Head] [ text "Mikel Dalmau" ]
+                            <| paragraph [ Font.center, centerY, Font.size 20, padding 10, onClick Head] [html <| animatedText "animatedSubTitle3" ["Mikel ","Dalmau"]]
 
                         attrs = (secondaryFontAttrs ++ [height fill, Font.size 10, Font.color <| gray80, mouseOver [Font.color <| highlight]])
-                        menuL = \hidden -> el (attrs ++ [transparent hidden, alignLeft, width (fillPortion 1)]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [ text "About"]
+                        menuL = \hidden -> el (attrs ++ [transparent hidden, alignLeft, width (fillPortion 1)]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [html <| animatedText "animatedSubTitle3" ["About"]]
                         menuR = \hidden -> el (attrs ++ [transparent hidden, alignRight, width <| px 120]) <| paragraph [Font.center, centerY, rotate <| degrees -90, pointer] <| [
                             link []
                                 { url = partnerMailto
-                                , label = text "mikeldalmauc@gmail.com"}
+                                , label = html <| animatedText "animatedSubTitle3" ["mikeldalmauc@gmail.com"] }
                             ]
                         slider = \hidden ->
                             if model.tab > 0 then 
@@ -363,15 +363,20 @@ phoneLayout model =
                                             , el [height <| fillPortion 1] none
                                             ]
                                     ]
+                        backgroundAttrs = 
+                            if model.tab == 0 then 
+                                [htmlAttribute (Attrs.attribute "style" "background: none !important;")
+                                ,htmlAttribute (Attrs.attribute "style" "pointer-events: none ;")]
+                            else 
+                                [Background.color black08]
                     in
                         layout
-                            (about ++ [ width fill, height fill,
-                                if model.tab == 0 then (Background.color <| rgba 0 0 0 0) else Background.color black08
+                            (about ++ [ width fill, height fill
                                 -- , behindContent <| infoDebug model -- TODO hide maybeÇ
                                 -- , Element.explain Debug.todo
-                            ])
+                            ]++ backgroundAttrs)
                             <|  column
-                                ((reduceOpacityWhenBehind model.about) ++ [ height fill, width fill])
+                                ((reduceOpacityWhenBehind model.about) ++ [ height fill, width fill]++ backgroundAttrs )
                                 [ name False
                                 , row
                                     [ height <| fillPortion 8, width fill]
@@ -391,14 +396,14 @@ desktopLayout model =
         conf = layoutConf model.device
 
         name = \hidden -> el (brandFontAttrs ++ [ transparent hidden, width fill, height <| fillPortion 1, centerX, Font.color <| gray50, mouseOver [Font.color <| highlight]  ]) 
-            <| paragraph [ Font.center, centerY, Font.size 20, padding 40, onClick Head, pointer] [ text "Mikel Dalmau" ]
+            <| paragraph [ Font.center, centerY, Font.size 20, padding 40, onClick Head, pointer] [html <| animatedText "animatedSubTitle3" ["Mikel ","Dalmau"]]
 
         attrs = (secondaryFontAttrs ++ [width (fillPortion 2), height fill, Font.size 12, Font.color <| gray80, mouseOver [Font.color <| highlight]])
-        menuL = \hidden -> el (attrs ++ [ transparent hidden, alignLeft]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [ text "About"]
+        menuL = \hidden -> el (attrs ++ [ transparent hidden, alignLeft]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [html <| animatedText "animatedSubTitle3" ["About"]]
         menuR = \hidden -> el (attrs ++ [ transparent hidden, alignRight]) <| paragraph [Font.center, centerY, rotate <| degrees -90, pointer] <| [
             link []
                 { url = partnerMailto
-                , label = text "mikeldalmauc@gmail.com"}
+                , label = html <| animatedText "animatedSubTitle3" ["mikeldalmauc@gmail.com"] }
             ]
             
         -- Slider definition
@@ -428,16 +433,21 @@ desktopLayout model =
                             , el [height <| fillPortion 1] none
                             ]
                     ]
+        backgroundAttrs = 
+            if model.tab == 0 then 
+                [htmlAttribute (Attrs.attribute "style" "background: none !important;")
+                ,htmlAttribute (Attrs.attribute "style" "pointer-events: none ;")]            
+            else 
+                [Background.color black08]
     in 
         layout
-            (about ++ [ width fill, height fill, 
-                if model.tab == 0 then (Background.color <| rgba 0 0 0 0) else Background.color black08
+            (about ++ [ width fill, height fill
                 -- , behindContent <| infoDebug model -- TODO hide maybeÇ
                 -- , Element.explain Debug.todo
          
-            ])
+            ] ++ backgroundAttrs)
             <|  column
-                ((reduceOpacityWhenBehind model.about) ++ [ height fill, width fill])
+                ((reduceOpacityWhenBehind model.about) ++ [ height fill, width fill]++ backgroundAttrs)
                 [ name <| model.about == Visible
                 , row
                     [ height <| fillPortion 18, width fill, spaceEvenly]
@@ -518,7 +528,9 @@ viewAbout model =
         conf = layoutConf model.device
 
     in
-        el [  height fill, centerY] 
+        el [  height fill, centerY 
+            , htmlAttribute (Attrs.attribute "style" "background: none !important;")
+            ,htmlAttribute (Attrs.attribute "style" "pointer-events: none ;")]
             <|
                 column
                 [centerY, width <| fillPortion 2, Font.color <| rgb 255 255 255, spacing 10]
@@ -544,14 +556,28 @@ viewAbout model =
                 ]
 
 
+animatedText : String -> List String ->  Html msg 
+animatedText class words = 
+    let 
+         animationAttrs = 
+            "transform: scale(0.94);"
+            ++"animation: scale 3s forwards cubic-bezier(0.5, 1, 0.89, 1);"
+            ++ "white-space:pre"
+    in
+        Html.div [Attrs.class class, Attrs.attribute "style" animationAttrs]
+            <| List.map (\word ->  Html.span [] [Html.text word]) words
+
 viewTab0 : Model -> Element Msg 
 viewTab0 model = 
     let
         
         conf = layoutConf model.device
+        
+       
 
         arrow = 
-            el [height fill, centerX, padding conf.arrowPadding]
+            el [height fill, centerX, padding conf.arrowPadding
+            , htmlAttribute (Attrs.attribute "style" "opacity:0; animation: fade-in 1.5s 3.8s forwards cubic-bezier(0.11, 0, 0.5, 0);")]
             <| image [width <| px conf.arrowWidth
                 , height <| px conf.arrowHeight
                 , alignBottom
@@ -562,20 +588,21 @@ viewTab0 model =
         el [ centerX, height fill, centerY, inFront arrow] 
             <|
                 column
-                [centerY, width fill, Font.color <| rgb 255 255 255, spacing 10]
+                [centerY, width fill, Font.color <| rgb 255 255 255, spacing 10
+                ]
                 [ paragraph
-                        (brandFontAttrs ++ [Font.size conf.tab0TitleFontSize, Font.center ])
-                        [ text "Mikel Dalmau" ]
+                        (brandFontAttrs ++ [Font.size conf.tab0TitleFontSize, Font.center])
+                        [ html  <| animatedText "animatedTitle" ["Mikel ", "Dalmau"] ]
                 , Element.textColumn [padding 10, spacing 10] 
                     [paragraph
                         (baseFontAttrs ++ [Font.size conf.tab0SubTitleFontSize, Font.center])
-                        [ text "Software Engineer"]
+                        [ html  <| animatedText "animatedSubTitle" ["Software ", "Engineer"] ]
                     ,paragraph
                         (baseFontAttrs ++ [Font.size conf.tab0SubTitleFontSize, Font.center])
-                        [ text "&"]
+                        [ html  <| animatedText "animatedSubTitle2" ["&"] ] 
                     ,paragraph
                         (baseFontAttrs ++ [Font.size conf.tab0SubTitleFontSize, Font.center])
-                        [ text "Artist"]
+                        [ html  <| animatedText "animatedSubTitle2" ["Artist"] ]
                     ]
                 ]
 

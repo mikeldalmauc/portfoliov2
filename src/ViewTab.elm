@@ -12,6 +12,7 @@ import Html.Attributes as Attrs
 import Element.Background as Background
 import Element.Border as Border
 import IntragramEmbeddings exposing (..)
+import List exposing (map)
 
 type alias Texts = List (String, String)
 
@@ -219,13 +220,36 @@ textSlide : Device -> (String, String) -> Html Gallery.Msg
 textSlide device (title, subtitle) =
     let
         conf = layoutConf device
-
+        animationAttrs = 
+            "transform: scale(0.94);"
+            ++"animation: scale 3s forwards cubic-bezier(0.5, 1, 0.89, 1);"
+            ++"display:flex;"
+            ++"flex-wrap: wrap;"
         subtitleFont = String.fromInt conf.subtitleFontSize ++ "px"
+
+        wrapWordsWithSpan = \text -> 
+            String.lines text 
+            |> List.map String.words 
+            |> List.concatMap (\line -> 
+                let 
+                    lineWithBreak = case List.reverse line of
+                        x :: xs -> (x) :: xs |> List.reverse
+                        [] -> []
+                in 
+                    List.map (\word -> Html.span [][Html.text (word++" ")]) lineWithBreak
+            )
+        
     in
-        Html.article [] [ Html.h3 [Attrs.attribute "style" "margin-bottom: 10px;"] [ Html.text title]
+        Html.article [] [ Html.h3 
+                            [Attrs.attribute "style" <| "margin-bottom: 10px;" ++ animationAttrs
+                            , Attrs.class "animatedText"
+                            ] <| wrapWordsWithSpan title
             , Html.p 
-                [ Attrs.attribute "style" <| "font-size:"++ subtitleFont ++"; letter-spacing: 1.2px; font-family: 'Montserrat', sans-serif;word-spacing: 1.2px; font-variant: normal;"
-                ] [ Html.text subtitle ] ]
+                [ Attrs.attribute "style" <| "font-size:"++ subtitleFont 
+                ++"; letter-spacing: 1.2px; font-family: 'Montserrat', sans-serif ;word-spacing: 1.2px; font-variant: normal;"
+                ++ animationAttrs
+                , Attrs.class "animatedText"
+                ] <| wrapWordsWithSpan subtitle ]
 
 embeddedSlides :  List String ->  List ( String, Html Gallery.Msg )
 embeddedSlides embeddings =
