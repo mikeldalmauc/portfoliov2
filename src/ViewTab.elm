@@ -9,6 +9,7 @@ import Element.Font as Font
 import Base exposing (goldenRatio)
 import Tuple exposing (first)
 import Html.Attributes as Attrs
+import Html.Lazy as Lazy
 import Element.Background as Background
 import Element.Border as Border
 import IntragramEmbeddings exposing (..)
@@ -16,18 +17,6 @@ import List exposing (map)
 
 type alias Texts = List (String, String)
 
-
-styling : Html msg
-styling =
-    Html.node "style"
-        []
-        [ Html.text
-            """
-               .elm-gallery-text-itemcontainer p{
-                    font-size:60px;
-               }    
-            """
-        ]
 
 imageConfig : Int -> Float -> Float -> Gallery.Config
 imageConfig transition w h =
@@ -98,7 +87,7 @@ imagesTab2 =
 textsTab2 : Texts
 textsTab2 =
   [ 
-      ("Ana de Armas\nBalde Runner", "Watercolor portrait")
+      ("Ana de Armas\nBlade Runner", "Watercolor portrait")
     , ("Jung Ho-yeon\nSquid Game", "Watercolor portrait")
     , ("Cara\nDelevingne\nCarnival Row", "Watercolor portrait")
     , ("Fish", "Watercolor")
@@ -193,22 +182,22 @@ sourceLabel icon label =
 
 imageSlides : List String -> List ( String, Html Gallery.Msg )
 imageSlides  images =
-    List.map (\image -> (image, imageSlide [] image Image.Contain )) images
+    List.indexedMap (\i image -> (image, imageSlide []  image Image.Contain )) images
+
+
 
 
 imageSlide : List (Html.Attribute msg) -> Image.Url -> Image.Size -> Html.Html msg
-imageSlide attrs url size =
-
+imageSlide attrs  url size =
     Html.img
         ([ Attrs.src (url ++ "-or.jpg")
         , Attrs.style "object-fit" (toObjectFit size)
         , Attrs.class "elm-gallery-image"
         , Attrs.attribute "srcset" <| srcSet url
-        , Attrs.attribute "sizes" <| "100vw"
         ]
             ++ attrs
         )
-        [ ]
+        []
 
 
 textSlides : Device -> Texts ->  List ( String, Html Gallery.Msg )

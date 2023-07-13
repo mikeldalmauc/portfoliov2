@@ -41,6 +41,11 @@ type alias LayoutConf =
     , igSize : Int
     , instragramEmbeddingMaxWidth : Int
     , instragramEmbeddingMinWidth : Int
+    , slideCountSpacing : Int
+    , slideCountHeight : Int
+    , slideCountWidth : Int
+    , slideLeftDisp : Float
+    , slideDownDisp : Float
     }
 
 layoutConf : Device -> LayoutConf
@@ -79,6 +84,11 @@ layoutConf device =
                 , igSize = 64
                 , instragramEmbeddingMaxWidth = 540
                 , instragramEmbeddingMinWidth = 150
+                , slideCountSpacing = 10
+                , slideCountHeight = 16
+                , slideCountWidth = 2
+                , slideLeftDisp = 0
+                , slideDownDisp = 0
                 }
             Phone -> 
                 { fontSize=30
@@ -107,6 +117,11 @@ layoutConf device =
                 , igSize = 32
                 , instragramEmbeddingMaxWidth = 200
                 , instragramEmbeddingMinWidth = 150
+                , slideCountSpacing = 4
+                , slideCountHeight = 6
+                , slideCountWidth = 1
+                , slideLeftDisp = 90
+                , slideDownDisp = 16
                 }
             _ ->
                 { fontSize=70
@@ -135,6 +150,11 @@ layoutConf device =
                 , igSize = 64
                 , instragramEmbeddingMaxWidth = 425
                 , instragramEmbeddingMinWidth = 256
+                , slideCountSpacing = 8
+                , slideCountHeight = 12
+                , slideCountWidth = 2
+                , slideLeftDisp = 28
+                , slideDownDisp = 20
                 }
 
 

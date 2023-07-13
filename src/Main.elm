@@ -288,9 +288,19 @@ view model =
                         } 
                         SwipeEnd
                     ]
-                    [ phoneLayout model ]
+                    [phoneLayout model]
+
             Tablet ->
-                phoneLayout model
+                Html.div 
+                    [ Swipe.onStart Swipe
+                    , Swipe.onMove Swipe
+                    , Swipe.onEndWithOptions 
+                        { stopPropagation = True
+                        , preventDefault = False
+                        } 
+                        SwipeEnd
+                    ]
+                    [phoneLayout model]
             Desktop ->
                 desktopLayout model
             BigDesktop ->
@@ -324,11 +334,11 @@ phoneLayout model =
 
                         attrs = (secondaryFontAttrs ++ [htmlAttribute (Attrs.attribute "style" "z-index: 10;"), height fill, Font.size 10, Font.color <| gray90, mouseOver [Font.color <| highlight]])
                         menuL = \hidden -> el (attrs ++ [transparent hidden, alignLeft, width (fillPortion 1)]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [ 
-                            if model.about == Visible then text "Close" else html <| animatedText "animatedSubTitle3" ["About"]]
+                            if model.about == Visible then text "Close" else (if  model.tab /= 0 then text "About" else html <| animatedText "animatedSubTitle3"  ["About"])]
                         menuR = \hidden -> el (attrs ++ [transparent hidden, alignRight, width <| px 120]) <| paragraph [Font.center, centerY, rotate <| degrees -90, pointer] <| [
                             link []
                                 { url = partnerMailto
-                                , label =  if model.about == Visible then  text "mikeldalmauc@gmail.com" else html <| animatedText "animatedSubTitle3" ["mikeldalmauc@gmail.com"] }
+                                , label =  if model.about == Visible || model.tab /= 0 then  text "mikeldalmauc@gmail.com" else html <| animatedText "animatedSubTitle3" ["mikeldalmauc@gmail.com"] }
                             ]
                         slider = \hidden ->
                             if model.tab > 0 then 
@@ -404,11 +414,11 @@ desktopLayout model =
 
         attrs = (secondaryFontAttrs ++ [htmlAttribute (Attrs.attribute "style" "z-index: 10;"), width (fillPortion 2), height fill, Font.size 12, Font.color <| gray80, mouseOver [Font.color <| highlight]])
         menuL = \hidden -> el (attrs ++ [transparent hidden, alignLeft]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| 
-            [ if model.about == Visible then text "Close" else  html <| animatedText "animatedSubTitle3"  ["About"]]
+            [ if model.about == Visible then text "Close" else (if  model.tab /= 0 then text "About" else html <| animatedText "animatedSubTitle3"  ["About"])]
         menuR = \hidden -> el (attrs ++ [ transparent hidden, alignRight]) <| paragraph [Font.center, centerY, rotate <| degrees -90, pointer] <| [
             link []
                 { url = partnerMailto
-                , label =  if model.about == Visible then  text "mikeldalmauc@gmail.com" else html <| animatedText "animatedSubTitle3" ["mikeldalmauc@gmail.com"] }
+                , label =  if model.about == Visible || model.tab /= 0 then  text "mikeldalmauc@gmail.com" else html <| animatedText "animatedSubTitle3" ["mikeldalmauc@gmail.com"] }
             ]
             
         -- Slider definition
@@ -660,6 +670,7 @@ viewSliderTab justChangedTab maybeLinks maybeEmbeddings maybeImages texts dimens
         linksGallery = viewLinksGallery device  galleryState imageConfig maybeLinks
         embeddedGallery = viewEmbeddedsGallery galleryState imageConfig maybeEmbeddings
         textGallery = viewTextsGallery device galleryState textConfig texts linksGallery
+        slidesCount = viewSlidesCount device maybeImages maybeEmbeddings galleryState
 
     in
         el [ centerX, centerY ]
@@ -667,6 +678,7 @@ viewSliderTab justChangedTab maybeLinks maybeEmbeddings maybeImages texts dimens
             [ width fill, height fill, Font.color <| rgb 255 255 255
             , behindContent imageGallery
             , behindContent embeddedGallery
+            , behindContent slidesCount
             ]
             [
                 textGallery
@@ -728,6 +740,29 @@ viewTextsGallery device galleryState textConfig texts linksGallery =
             <| html 
             <| Html.div [] [Html.map GalleryMsg <| Gallery.viewText textConfig galleryState.text [] (ViewTab.textSlides device texts) ]
     
+
+viewSlidesCount : Device -> Maybe (List String) -> Maybe (List String) -> GalleryState -> Element Msg
+viewSlidesCount device maybeImages maybeEmbeddings galleryState =
+    let 
+        slider = \images -> 
+            let
+                    conf  = layoutConf device
+                    stickAttrs = [width <| px conf.slideCountWidth, height <| px conf.slideCountHeight, Border.rounded 1]
+                    stick = el (Background.color gray50::stickAttrs) none
+                    stickGlowing = el ([Background.color gray80, Border.glow (rgba 1 1 1 0.8) 1.0] ++ stickAttrs) none
+            in  
+                List.range 1 (length images) 
+                    |> List.map (\i -> if i == Gallery.current galleryState.image + 1 then stickGlowing else stick)
+                    |> row [alignRight, alignBottom, spacing conf.slideCountSpacing, moveLeft conf.slideLeftDisp, moveDown conf.slideDownDisp]
+    in
+        case maybeImages of 
+                Just images -> slider images
+                    
+                Nothing -> 
+                    case maybeEmbeddings of 
+                        Just embeddings -> slider embeddings
+                        Nothing -> el [] none
+
 
 -- Subscribe to the `messageReceiver` port to hear about messages coming in
 -- from JS. Check out the index.html file to see how this is hooked up to a

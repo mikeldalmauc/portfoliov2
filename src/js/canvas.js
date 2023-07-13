@@ -7,6 +7,10 @@ renderer.shadowMap.enabled = true;
 renderer.domElement.style.position = 'absolute';
 renderer.domElement.style.zIndex = 0;
 renderer.setSize(window.innerWidth, window.innerHeight);
+window.onresize = (event) => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+};
+
 document.getElementById('canvas').appendChild(renderer.domElement);
 
 // Sets the color of the background
@@ -39,8 +43,7 @@ const camera = new THREE.PerspectiveCamera(
 // camera.position.set(-13.27, 1.201, -0.98928);
 // camera.position.set(-18.123, 0.937, -1.236);
 camera.position.set(-13.927, 0.947, -1.79);
-camera.rotation.y -= Math.PI/2
-console.log(camera.position);
+camera.rotation.y -= Math.PI/2;
 
 const camerav2 = new THREE.Vector2(camera.position.x, camera.position.z);
 
