@@ -404,8 +404,7 @@ desktopLayout model =
 
         attrs = (secondaryFontAttrs ++ [htmlAttribute (Attrs.attribute "style" "z-index: 10;"), width (fillPortion 2), height fill, Font.size 12, Font.color <| gray80, mouseOver [Font.color <| highlight]])
         menuL = \hidden -> el (attrs ++ [transparent hidden, alignLeft]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| 
-            [html <| animatedText "animatedSubTitle3" 
-                <| [if model.about == Visible then "Close" else "About"]]
+            [ if model.about == Visible then text "Close" else  html <| animatedText "animatedSubTitle3"  ["About"]]
         menuR = \hidden -> el (attrs ++ [ transparent hidden, alignRight]) <| paragraph [Font.center, centerY, rotate <| degrees -90, pointer] <| [
             link []
                 { url = partnerMailto
