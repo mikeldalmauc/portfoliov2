@@ -310,6 +310,7 @@ phoneLayout model =
                         [ width fill, height fill,
                             if model.tab == 0 then (Background.color <| rgba 0 0 0 0) else Background.color black08
                                         -- , behindContent <| infoDebug model -- TODO hide maybeÇ
+                        , htmlAttribute (Attrs.attribute "style" "pointer-events: none ;")
                         ]
                         <| el (brandFontAttrs ++ [centerX, centerY, Font.color highlight, Font.center] )
                         <| text "Turn your device\n horizontally"
@@ -321,12 +322,13 @@ phoneLayout model =
                         name = \hidden -> el (brandFontAttrs ++ [ transparent hidden, width fill, height <| fillPortion 1, centerX, Font.color <| gray50] ) 
                             <| paragraph [ Font.center, centerY, Font.size 20, padding 10, onClick Head] [html <| animatedText "animatedSubTitle2" ["Mikel ","Dalmau"]]
 
-                        attrs = (secondaryFontAttrs ++ [height fill, Font.size 10, Font.color <| gray90, mouseOver [Font.color <| highlight]])
-                        menuL = \hidden -> el (attrs ++ [transparent hidden, alignLeft, width (fillPortion 1)]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [ text "About"]
+                        attrs = (secondaryFontAttrs ++ [htmlAttribute (Attrs.attribute "style" "z-index: 10;"), height fill, Font.size 10, Font.color <| gray90, mouseOver [Font.color <| highlight]])
+                        menuL = \hidden -> el (attrs ++ [transparent hidden, alignLeft, width (fillPortion 1)]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [ 
+                            if model.about == Visible then text "Close" else html <| animatedText "animatedSubTitle3" ["About"]]
                         menuR = \hidden -> el (attrs ++ [transparent hidden, alignRight, width <| px 120]) <| paragraph [Font.center, centerY, rotate <| degrees -90, pointer] <| [
                             link []
                                 { url = partnerMailto
-                                , label = text "mikeldalmauc@gmail.com"}
+                                , label =  if model.about == Visible then  text "mikeldalmauc@gmail.com" else html <| animatedText "animatedSubTitle3" ["mikeldalmauc@gmail.com"] }
                             ]
                         slider = \hidden ->
                             if model.tab > 0 then 
@@ -355,8 +357,9 @@ phoneLayout model =
                                             [ name True
                                             , row
                                                 [ height <| fillPortion 18, width fill, spaceEvenly]
-                                                [ el (attrs ++ [alignLeft]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [ text "Close"] 
+                                                [ menuL False
                                                 -- , el [width <| fillPortion 2, height fill] none
+                                                -- , 
                                                 , viewTab Visible model
                                                 , slider True
                                                 , menuR False]
@@ -366,7 +369,8 @@ phoneLayout model =
                         backgroundAttrs = 
                             if model.tab == 0 then 
                                 [htmlAttribute (Attrs.attribute "style" "background: none !important;")
-                                ,htmlAttribute (Attrs.attribute "style" "pointer-events: none ;")]
+                                -- ,htmlAttribute (Attrs.attribute "style" "pointer-events: none ;")
+                                ]
                             else 
                                 [Background.color black08]
                     in
@@ -398,12 +402,14 @@ desktopLayout model =
         name = \hidden -> el (brandFontAttrs ++ [ transparent hidden, width fill, height <| fillPortion 1, centerX, Font.color <| gray50, mouseOver [Font.color <| highlight]  ]) 
             <| paragraph [ Font.center, centerY, Font.size 20, padding 40, onClick Head, pointer] [html <| animatedText "animatedSubTitle3" ["Mikel ","Dalmau"]]
 
-        attrs = (secondaryFontAttrs ++ [width (fillPortion 2), height fill, Font.size 12, Font.color <| gray80, mouseOver [Font.color <| highlight]])
-        menuL = \hidden -> el (attrs ++ [ transparent hidden, alignLeft]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [html <| animatedText "animatedSubTitle3" ["About"]]
+        attrs = (secondaryFontAttrs ++ [htmlAttribute (Attrs.attribute "style" "z-index: 10;"), width (fillPortion 2), height fill, Font.size 12, Font.color <| gray80, mouseOver [Font.color <| highlight]])
+        menuL = \hidden -> el (attrs ++ [transparent hidden, alignLeft]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| 
+            [html <| animatedText "animatedSubTitle3" 
+                <| [if model.about == Visible then "Close" else "About"]]
         menuR = \hidden -> el (attrs ++ [ transparent hidden, alignRight]) <| paragraph [Font.center, centerY, rotate <| degrees -90, pointer] <| [
             link []
                 { url = partnerMailto
-                , label = html <| animatedText "animatedSubTitle3" ["mikeldalmauc@gmail.com"] }
+                , label =  if model.about == Visible then  text "mikeldalmauc@gmail.com" else html <| animatedText "animatedSubTitle3" ["mikeldalmauc@gmail.com"] }
             ]
             
         -- Slider definition
@@ -425,7 +431,7 @@ desktopLayout model =
                             [ name False
                             , row
                                 [ height <| fillPortion 18, width fill, spaceEvenly]
-                                [ el (attrs ++ [alignLeft]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [ text "Close"] 
+                                [ menuL False
                                 -- , el [width <| fillPortion 2, height fill] none
                                 , viewTab Visible model
                                 , slider True
@@ -528,7 +534,7 @@ viewAbout model =
         
         conf = layoutConf model.device
         backdrop = Html.div 
-            [Attrs.attribute "style" "background-color: rgba(0, 0, 0, 0.8); height: 100vh;  width: 100vw; margin: 0; padding: 0; position: fixed; top:0; left:0;"]
+            [Attrs.attribute "style" "z-index:1; background-color: rgba(0, 0, 0, 0.8); height: 100vh;  width: 100vw; margin: 0; padding: 0; position: fixed; top:0; left:0;"]
             []
     in
         el [  height fill

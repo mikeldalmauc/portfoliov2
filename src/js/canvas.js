@@ -1,8 +1,5 @@
 import * as THREE from '../../node_modules/three/build/three.module.js';
-import {OrbitControls} from '../../node_modules/three/examples/jsm/controls/OrbitControls.js';
-import * as dat from '../../node_modules/dat.gui/build/dat.gui.module.js';
-import { Perlin, FBM } from '../../node_modules/three-noise/build/three-noise.module.js';
-import * as BufferGeometryUtils from '../../node_modules/three/examples/jsm/utils/BufferGeometryUtils.js';
+import { Perlin } from '../../node_modules/three-noise/build/three-noise.module.js';
 
 const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.shadowMap.enabled = true;
