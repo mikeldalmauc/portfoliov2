@@ -1,9 +1,8 @@
 import * as THREE from '../../node_modules/three/build/three.module.js';
 import {OrbitControls} from '../../node_modules/three/examples/jsm/controls/OrbitControls.js';
 import * as dat from '../../node_modules/dat.gui/build/dat.gui.module.js';
-import nebula from '../../assets/content/scene/nebula.jpg';
-import stars from '../../assets/content/scene/stars.jpg';
-
+import { Perlin, FBM } from '../../node_modules/three-noise/build/three-noise.module.js';
+import * as BufferGeometryUtils from '../../node_modules/three/examples/jsm/utils/BufferGeometryUtils.js';
 
 const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.shadowMap.enabled = true;
@@ -14,236 +13,159 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.getElementById('canvas').appendChild(renderer.domElement);
 
 // Sets the color of the background
-// renderer.setClearColor(0xFEFEFE);
+renderer.setClearColor(0x171717);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
     45,
     window.innerWidth / window.innerHeight,
     0.1,
-    1000
+    500
 );
 
-const orbit = new OrbitControls(camera, renderer.domElement);
-orbit.update();
+// const orbit = new OrbitControls(camera, renderer.domElement);
+// orbit.update();
+
+// // // Add an event listener to track changes in the camera's position
+// orbit.addEventListener('change', function() {
+//   // Update the previous position with the camera's current position
+//   console.log('Camera position:', camera.position);
+
+// });
 
 // A guide to help you position your camera, 5 is length of axes
-const axesHelper = new THREE.AxesHelper(4);
-scene.add(axesHelper);
+// const axesHelper = new THREE.AxesHelper(4);
+// scene.add(axesHelper);
 
-camera.position.set(-5, 20, 20);
+// camera.position.set(-13.54, 3, -1.7);
+// camera.position.set(-13.21, 1.48, -1.18);
+// camera.position.set(-13.27, 1.201, -0.98928);
+// camera.position.set(-18.123, 0.937, -1.236);
+camera.position.set(-13.927, 0.947, -1.79);
+camera.rotation.y -= Math.PI/2
+console.log(camera.position);
 
-// Create a cube
-const boxGeometry = new THREE.BoxGeometry();
-const boxMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00});
-const box = new THREE.Mesh(boxGeometry, boxMaterial);
-scene.add(box);
+const camerav2 = new THREE.Vector2(camera.position.x, camera.position.z);
 
 // Create a plane
-const planeGeometry = new THREE.PlaneGeometry(20, 20);
+const planeGeometry = new THREE.PlaneGeometry(20, 40, 100, 200);
 const planeMaterial = new THREE.MeshStandardMaterial({
-  color: 0xAAAAAA
+  color: 0xFFFFFF
 , side: THREE.DoubleSide
-});
-const plane = new THREE.Mesh(planeGeometry, planeMaterial); 
-scene.add(plane);
-plane.rotation.x = -0.5 * Math.PI;
-plane.receiveShadow = true;
-
-// Grid helper
-const gridHelper = new THREE.GridHelper();
-scene.add(gridHelper);
-
-// Create a sphere
-const sphereGeometry = new THREE.SphereGeometry(2, 50, 50);
-const sphereMaterial = new THREE.MeshStandardMaterial({
-  color: 0x0000ff
 , wireframe: false
 });
-const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-scene.add(sphere);
-sphere.position.set(4, 4, 4);
-sphere.castShadow = true;
+
+// planeMaterial.shading = THREE.SmoothShading;
+
+const plane = new THREE.Mesh(planeGeometry, planeMaterial); 
+
+scene.add(plane);
+
+
+plane.receiveShadow = true;
+
+
 
 // Lights 
 
-const ambienLigth = new THREE.AmbientLight(0x404040);
+const ambienLigth = new THREE.AmbientLight(0x171717);
 scene.add(ambienLigth);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-scene .add(directionalLight);
+scene.add(directionalLight);
 directionalLight.position.set(5, 10, 5);
-directionalLight.castShadow = true;
+// directionalLight.castShadow = true;
 directionalLight.shadow.camera.bottom = -12;
-
-const dLightHelper = new THREE.DirectionalLightHelper(directionalLight, 3);
-scene.add(dLightHelper);
-
-const dLightShadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
-scene.add(dLightShadowHelper);
-
-const spotLight = new THREE.SpotLight(0xffffff, 0.5);
-scene.add(spotLight);
-spotLight.position.set(30, 30, 0); 
-spotLight.castShadow = true;
-spotLight.angle = 0.2;
-
-const sLightHelper = new THREE.SpotLightHelper(spotLight);
-scene.add(sLightHelper);
-
 
 // FOG 
 // scene.fog = new THREE.Fog(0xffffff, 0, 200);
-scene.fog = new THREE.FogExp2(0xffffff, 0.01);
+scene.fog = new THREE.FogExp2(0x111111, 0.08);
 
-
-// Background color
-// renderer.setClearColor(0xffea00);
-
-// Texture loading background
-const textureLoader = new THREE.TextureLoader();
-const cubeTextureLoader = new THREE.CubeTextureLoader();
-scene.background = cubeTextureLoader.load([
-    nebula
-  , nebula
-  , stars
-  , stars
-  , stars
-  , stars
-]);
-
-// Create a box with texture
-const box2Geometry = new THREE.BoxGeometry(4, 4, 4);
-const box2Material = new THREE.MeshBasicMaterial({
-    // map: textureLoader.load(nebula)
-});
-const box2MultiMaterial = [
-  new THREE.MeshBasicMaterial({map: textureLoader.load(stars)}) 
-, new THREE.MeshBasicMaterial({map: textureLoader.load(stars)}) 
-, new THREE.MeshBasicMaterial({map: textureLoader.load(nebula)}) 
-, new THREE.MeshBasicMaterial({map: textureLoader.load(stars)}) 
-, new THREE.MeshBasicMaterial({map: textureLoader.load(nebula)}) 
-, new THREE.MeshBasicMaterial({map: textureLoader.load(stars)}) 
-]
-const box2 = new THREE.Mesh(box2Geometry, box2MultiMaterial);
-scene.add(box2);
-box2.position.set(8, 4, 4);
-box2.material.map = textureLoader.load(nebula);
-// scene.background = textureLoader.load(nebula, texture => scene.background = texture  );
-
-// Create a plane to modify its points
-const plane2Geometry = new THREE.PlaneGeometry(10, 10, 10, 10);
-const plane2Material = new THREE.MeshBasicMaterial({
-  color: 0xAAAAAA
-  , wireframe: true
-});
-const plane2 = new THREE.Mesh(plane2Geometry, plane2Material);
-scene.add(plane2);
-plane2.position.set(5, 5, 10);
-
-// plane2.geometry.attributes.position.array[0] -= 10 * Math.random();
-// plane2.geometry.attributes.position.array[1] -= 10 * Math.random();
-// plane2.geometry.attributes.position.array[2] -= 10 * Math.random();
-const lastPointZ = plane2.geometry.attributes.position.array.length - 1;
-// plane2.geometry.attributes.position.array[lastPointZ] -= 10 * Math.random();
-
-
-// Shader materials
-
-const vShader = `
-  void main() {
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`
-const fShader = `
-  void main() {
-    gl_FragColor = vec4(0.5, 0.5, 0.0, 1.0);
-  }
-`
-
-const sphere2Geometry = new THREE.SphereGeometry(2, 50, 50);
-const sphere2Material = new THREE.ShaderMaterial({
-  vertexShader: vShader,
-  fragmentShader: fShader
-});
-const sphere2 = new THREE.Mesh(sphere2Geometry, sphere2Material);
-scene.add(sphere2);
-sphere2.position.set(-5, 10, 10);
 
 // Gui control
-const gui = new dat.GUI();
-const options = { 
-    sphereColor: '#0000ff'
-  , wireframe: false
-  , speed: 0.01
-  , angle: 0.2
-  , penumbra : 0
-  , intensity : 1
-};
+// const gui = new dat.GUI();
+// const options = { 
+//     rotationX: plane.rotation.x
+//   , rotationY: plane.rotation.y
+//   , rotationZ: plane.rotation.z
+// };
 
-gui.add(options, 'sphereColor').onChange(function(e){
-  sphere.material.color.set(e);
-});
+// gui.add(options, 'rotationX', -Math.PI, Math.PI).onChange(function(e){
+//   plane.rotation.x = e ;
+// });
 
-gui.add(options, 'wireframe').onChange(function(e){
-  sphere.material.wireframe = e;
-});
+// gui.add(options, 'rotationY', -Math.PI, Math.PI).onChange(function(e){
+//   plane.rotation.y = e;
+// });
 
-gui.add(options, 'speed', 0, 0.1);
-
-gui.add(options, 'angle', 0, 1);
-gui.add(options, 'intensity', 0, 1);
-gui.add(options, 'penumbra', 0, 1);
-
-
-// Mouse position and object selection
-const mousePosition =  new THREE.Vector2();
-window.addEventListener('mousemove', function(e){
-  // normalize mouse position
-  mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
-  mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
-});
-
-const raycaster = new THREE.Raycaster();
-const sphereId = sphere.id;
-box2.name = "theBox";
+// gui.add(options, 'rotationZ', -Math.PI, Math.PI).onChange(function(e){
+//   plane.rotation.z = e;
+// });
 
 // Animation  loop
-let step = 0;
+// let step = 0;
+// ;
+
+// Instantiate the class with a seed
+// var freq = 1000;
+// var lastt = -1;
+// if(lastt == -1 ){
+//   lastt = time;
+// } else if (time - lastt > freq){
+//   lastt = time
+  
+// }
+
+// initial plane
+var perlin = new Perlin(Math.random());
+var perlin2 = new Perlin(Math.random());
+
 function animate(time){
-  
-  box.rotation.x = time / 1000;
-  box.rotation.y = time / 1000;
-  
-  step += options.speed;
-  sphere.position.y = 10 * Math.abs(Math.sin(step)); 
+  // var perlin2 = new Perlin(time);
 
-  spotLight.angle = options.angle; 
-  spotLight.intensity = options.intensity;
-  spotLight.penumbra = options.penumbra;  
-  sLightHelper.update();
-
-  // change properties of the sphere when the mouse is over it
-  raycaster.setFromCamera(mousePosition, camera);
-  const intersects = raycaster.intersectObjects(scene.children);
-  for(let i = 0; i < intersects.length; i++){
-    if(intersects[i].object.id === sphereId)
-      intersects[i].object.material.color.set(0xff0000);
+  for(var i=0; i<plane.geometry.attributes.position.array.length; i=i+3){
+    var x = plane.geometry.attributes.position.array[i];
+    var z = plane.geometry.attributes.position.array[i+1];
+    var y = plane.geometry.attributes.position.array[i+2];
     
-    if(intersects[i].object.name === "theBox"){
-      intersects[i].object.rotation.x = time / 1000;
-      intersects[i].object.rotation.y = time / 1000;
-    }
-      
+    // Perlin noise 
+    const pos = new THREE.Vector3(x, y, z);
+    pos.y *= 0.3;
+    pos.y += time * 0.00012;
+    
+    // // Camera distance
+    const point = new THREE.Vector2(x, z);
+    
+    const normCam = camerav2.distanceTo(point);
+    
+    
+    plane.geometry.attributes.position.array[i+2] = perlin.get3(pos) + normCam*normCam*0.004;
   }
 
-  // change the plane points
-  // plane2.geometry.attributes.position.array[0] = 10 * Math.random();
-  // plane2.geometry.attributes.position.array[1] = 10 * Math.random();
-  // plane2.geometry.attributes.position.array[2] = 10 * Math.random();
-  // plane2.geometry.attributes.position.array[lastPointZ] = 10 * Math.random();
-  // plane2.geometry.attributes.position.needsUpdate = true;
-  
+  for(var i=0; i<plane.geometry.attributes.position.array.length; i=i+3){
+    var x = plane.geometry.attributes.position.array[i];
+    var z = plane.geometry.attributes.position.array[i+1];
+    var y = plane.geometry.attributes.position.array[i+2];
+    
+    // Perlin noise 
+    const pos = new THREE.Vector3(x, y, z);
+    pos.y *= 0.3;
+    pos.y += time * 0.00012;
+    
+    // // Camera distance
+    const point = new THREE.Vector2(x, 1.3*z);
+    
+    const normCam = camerav2.distanceTo(point);
+    
+    
+    plane.geometry.attributes.position.array[i+2] = perlin.get3(pos) + normCam*normCam*0.004;
+  }
+
+
+  plane.rotation.x = -0.5 * Math.PI;
+  // plane.geometry = BufferGeometryUtils.mergeVertices(plane.geometry, 0.1);
+  // plane.geometry.computeVertexNormals(true);
+  plane.geometry.attributes.position.needsUpdate = true;
 
   // Link the scene and the camera
   renderer.render(scene, camera);
@@ -251,6 +173,5 @@ function animate(time){
 
 renderer.setAnimationLoop(animate);
 
-
 renderer.render(scene, camera);
-orbit.update();
+// orbit.update();

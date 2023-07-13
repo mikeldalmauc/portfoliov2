@@ -10,6 +10,7 @@ import Svg
 import Svg.Attributes as SvgAttrs
 import Html exposing (Html)
 import Element.HexColor as HexColor
+import Element exposing (rgba)
 
 
             
@@ -200,6 +201,11 @@ gray50 = rgb  0.5 0.5 0.5
 gray80 : Color
 gray80 = rgb  0.8 0.8 0.8
 
+black80 : Color
+black80 = rgba 1 1 1 0.8
+
+gray90 : Color
+gray90 = rgb  0.9 0.9 0.9
 
 black08 : Color
 black08 = rgb 0.09 0.09 0.09 

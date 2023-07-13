@@ -24,7 +24,10 @@
         "gulp-sourcemaps": "^3.0.0",
         "jquery": "^3.6.3",
         "postcss": "^8.4.21",
-        "sharp": "^0.32.1"
+        "sharp": "^0.32.1",
+        "simplex-noise": "^4.0.1",
+        "three-fatline": "^0.6.1",
+        "three-noise": "^1.1.2"
     },
     "devDependencies": {
         "file-loader": "^6.2.0",

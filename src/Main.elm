@@ -321,7 +321,7 @@ phoneLayout model =
                         name = \hidden -> el (brandFontAttrs ++ [ transparent hidden, width fill, height <| fillPortion 1, centerX, Font.color <| gray50] ) 
                             <| paragraph [ Font.center, centerY, Font.size 20, padding 10, onClick Head] [html <| animatedText "animatedSubTitle2" ["Mikel ","Dalmau"]]
 
-                        attrs = (secondaryFontAttrs ++ [height fill, Font.size 10, Font.color <| gray80, mouseOver [Font.color <| highlight]])
+                        attrs = (secondaryFontAttrs ++ [height fill, Font.size 10, Font.color <| gray90, mouseOver [Font.color <| highlight]])
                         menuL = \hidden -> el (attrs ++ [transparent hidden, alignLeft, width (fillPortion 1)]) <| paragraph [Font.center, centerY, rotate <| degrees -90, onClick ToggleAbout, pointer] <| [ text "About"]
                         menuR = \hidden -> el (attrs ++ [transparent hidden, alignRight, width <| px 120]) <| paragraph [Font.center, centerY, rotate <| degrees -90, pointer] <| [
                             link []
@@ -463,7 +463,7 @@ desktopLayout model =
 
 reduceOpacityWhenBehind : AboutModalState -> List (Attribute msg)
 reduceOpacityWhenBehind about =
-    if about == Hidden then [] else [htmlAttribute (Attrs.attribute "style" "filter: opacity(0.2);")]
+    if about == Hidden then [] else [htmlAttribute (Attrs.attribute "style" "filter: opacity(1);")]
 
 infoDebug : Model -> Element msg
 infoDebug model =
@@ -527,9 +527,13 @@ viewAbout model =
     let
         
         conf = layoutConf model.device
-
+        backdrop = Html.div 
+            [Attrs.attribute "style" "background-color: rgba(0, 0, 0, 0.8); height: 100vh;  width: 100vw; margin: 0; padding: 0; position: fixed; top:0; left:0;"]
+            []
     in
-        el [  height fill, centerY 
+        el [  height fill
+            , behindContent <| html backdrop
+            , centerY 
             , htmlAttribute (Attrs.attribute "style" "background: none !important;")
             , htmlAttribute (Attrs.attribute "style" "pointer-events: none ;")]
             <|

@@ -1,5 +1,9 @@
 # portfoliov2
-Personal portfolio website built with elm, elm-ui
+Personal portfolio website built with elm, elm
+
+This website design is based on stevenmengin.com website, the website is intended to evolve and gradually the design will distantiate.
+
+Implementation is all done by myself.
 
 ## Install
 
