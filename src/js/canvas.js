@@ -1,7 +1,8 @@
-import * as THREE from '../../node_modules/three/build/three.module.js';
+import {WebGLRenderer,Scene, PerspectiveCamera, Vector2, Vector3, PlaneGeometry
+  , DirectionalLight, AmbientLight, FogExp2, MeshStandardMaterial, Mesh, DoubleSide} from '../../node_modules/three/build/three.module.js';
 import { Perlin } from '../../node_modules/three-noise/build/three-noise.module.js';
 
-const renderer = new THREE.WebGLRenderer({antialias: true});
+const renderer = new WebGLRenderer({antialias: true});
 renderer.shadowMap.enabled = true;
 
 renderer.domElement.style.position = 'absolute';
@@ -16,8 +17,8 @@ document.getElementById('canvas').appendChild(renderer.domElement);
 // Sets the color of the background
 renderer.setClearColor(0x171717);
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
+const scene = new Scene();
+const camera = new PerspectiveCamera(
     45,
     window.innerWidth / window.innerHeight,
     0.1,
@@ -35,7 +36,7 @@ const camera = new THREE.PerspectiveCamera(
 // });
 
 // A guide to help you position your camera, 5 is length of axes
-// const axesHelper = new THREE.AxesHelper(4);
+// const axesHelper = new AxesHelper(4);
 // scene.add(axesHelper);
 
 // camera.position.set(-13.54, 3, -1.7);
@@ -45,19 +46,19 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.set(-13.927, 0.947, -1.79);
 camera.rotation.y -= Math.PI/2;
 
-const camerav2 = new THREE.Vector2(camera.position.x, camera.position.z);
+const camerav2 = new Vector2(camera.position.x, camera.position.z);
 
 // Create a plane
-const planeGeometry = new THREE.PlaneGeometry(20, 40, 100, 200);
-const planeMaterial = new THREE.MeshStandardMaterial({
+const planeGeometry = new PlaneGeometry(20, 40, 100, 200);
+const planeMaterial = new MeshStandardMaterial({
   color: 0xFFFFFF
-, side: THREE.DoubleSide
+, side: DoubleSide
 , wireframe: false
 });
 
-// planeMaterial.shading = THREE.SmoothShading;
+// planeMaterial.shading = SmoothShading;
 
-const plane = new THREE.Mesh(planeGeometry, planeMaterial); 
+const plane = new Mesh(planeGeometry, planeMaterial); 
 
 scene.add(plane);
 
@@ -68,18 +69,18 @@ plane.receiveShadow = true;
 
 // Lights 
 
-const ambienLigth = new THREE.AmbientLight(0x171717);
+const ambienLigth = new AmbientLight(0x171717);
 scene.add(ambienLigth);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+const directionalLight = new DirectionalLight(0xffffff, 0.5);
 scene.add(directionalLight);
 directionalLight.position.set(5, 10, 5);
 // directionalLight.castShadow = true;
 directionalLight.shadow.camera.bottom = -12;
 
 // FOG 
-// scene.fog = new THREE.Fog(0xffffff, 0, 200);
-scene.fog = new THREE.FogExp2(0x111111, 0.08);
+// scene.fog = new Fog(0xffffff, 0, 200);
+scene.fog = new FogExp2(0x111111, 0.08);
 
 
 // Gui control
@@ -129,12 +130,12 @@ function animate(time){
     var y = plane.geometry.attributes.position.array[i+2];
     
     // Perlin noise 
-    const pos = new THREE.Vector3(x, y, z);
+    const pos = new Vector3(x, y, z);
     pos.y *= 0.3;
     pos.y += time * 0.00012;
     
     // // Camera distance
-    const point = new THREE.Vector2(x, z);
+    const point = new Vector2(x, z);
     
     const normCam = camerav2.distanceTo(point);
     
@@ -148,12 +149,12 @@ function animate(time){
     var y = plane.geometry.attributes.position.array[i+2];
     
     // Perlin noise 
-    const pos = new THREE.Vector3(x, y, z);
+    const pos = new Vector3(x, y, z);
     pos.y *= 0.3;
     pos.y += time * 0.00012;
     
     // // Camera distance
-    const point = new THREE.Vector2(x, 1.3*z);
+    const point = new Vector2(x, 1.3*z);
     
     const normCam = camerav2.distanceTo(point);
     

@@ -550,7 +550,8 @@ viewAbout model =
             , behindContent <| html backdrop
             , centerY 
             , htmlAttribute (Attrs.attribute "style" "background: none !important;")
-            , htmlAttribute (Attrs.attribute "style" "pointer-events: none ;")]
+            -- , htmlAttribute (Attrs.attribute "style" "pointer-events: none ;")]
+            ]
             <|
                 column
                 [centerY, width <| fillPortion 2, Font.color <| rgb 255 255 255, spacing 10]
