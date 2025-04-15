@@ -2,7 +2,7 @@
 
 Personal portfolio website built with elm, elm
 
-This website design is based on https://www.stevenmengin.com/ website, the website is intended to evolve and gradually distantiate on this aspect, as all implementation and tecnical solutions have been done by myself, skipping as much as possible from the desing process has been really helpful.
+This website design is based on [www.stevenmengin.com](https://www.stevenmengin.com/) website, the website is intended to evolve and gradually distantiate on this aspect, as all implementation and tecnical solutions have been done by myself, skipping as much as possible from the desing process has been really helpful.
 
 - [Personal Portfolio Mikel Dalmau](#personal-portfolio-mikel-dalmau)
   - [Install](#install)
