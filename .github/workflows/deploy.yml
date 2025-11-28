@@ -1,0 +1,57 @@
+name: Deploy to S3
+
+on:
+  push:
+    branches:
+      - main  # O 'master' si esa es tu rama principal
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Chequeo de código
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # 4. Configurar credenciales de AWS
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # # 5. Desplegar a S3
+      - name: Deploy to S3
+        run: aws s3 sync ./build s3://${{ secrets.S3_BUCKET }} --delete
+        
+      # 1) Sync general (excluye imágenes) con cache razonable
+      # - name: Sync static (no images)
+      #   run: |
+      #     aws s3 sync ./build s3://${{ secrets.S3_BUCKET }} \
+      #       --delete \
+      #       --cache-control "public,max-age=3600" \
+      #       --exclude "*.webp" --exclude "*.png"
+
+      # # 2) WEBP con MIME correcto + cache largo
+      # - name: Sync WEBP with correct MIME
+      #   run: |
+      #     aws s3 sync ./build s3://${{ secrets.S3_BUCKET }} \
+      #       --include "*.webp" --exclude "*" \
+      #       --content-type "image/webp" \
+      #       --cache-control "public,max-age=31536000,immutable" \
+      #       --exact-timestamps
+
+      # # 3) PNG con MIME correcto + cache largo
+      # - name: Sync PNG with correct MIME
+      #   run: |
+      #     aws s3 sync ./build s3://${{ secrets.S3_BUCKET }} \
+      #       --include "*.png" --exclude "*" \
+      #       --content-type "image/png" \
+      #       --cache-control "public,max-age=31536000,immutable" \
+      #       --exact-timestamps
+            
+      # 6. Invalidar caché de CloudFront
+      - name: Invalidate CloudFront Cache
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
