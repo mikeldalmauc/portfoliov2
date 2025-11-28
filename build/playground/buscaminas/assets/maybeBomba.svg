@@ -1,0 +1,54 @@
+<svg id="Flag" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="500" height="500" viewBox="0 0 500 500">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: #0b092d;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-6 {
+        stroke: #f7f7f7;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6 {
+        stroke-width: 1px;
+      }
+
+      .cls-1, .cls-3, .cls-4, .cls-5, .cls-6 {
+        fill-rule: evenodd;
+      }
+
+      .cls-3 {
+        fill: #171f49;
+      }
+
+      .cls-4, .cls-5 {
+        fill: #9ba2c5;
+      }
+
+      .cls-5 {
+        stroke: #4d4d4d;
+      }
+
+      .cls-6 {
+        fill: url(#linear-gradient);
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="69" y1="140.489" x2="316.062" y2="170.824" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#NaNNaNNaN"/>
+      <stop offset="0.229" stop-color="#b4202b"/>
+      <stop offset="0.693" stop-color="#e3c0c0"/>
+      <stop offset="0.982" stop-color="#e53f4b"/>
+      <stop offset="1" stop-color="#e53f4b"/>
+    </linearGradient>
+  </defs>
+  <path class="cls-1" d="M271.419,76.011c1.291,0.482-2.034,310.145,0,310.145s42.839,1.913,42.839,0-0.488-311.328,0-311.145S333,68.3,333,68.007,306.465,58.818,306.226,52c-0.288.107-24.038,0.032-34.807,0-3.718,8.3-.787,9.194-21.419,16.007C262.475,72.848,270.939,76.549,271.419,76.011Z"/>
+  <path id="Rounded_Rectangle_1" data-name="Rounded Rectangle 1" class="cls-2" d="M142,328H407a34,34,0,0,1,34,34v81a10,10,0,0,1-10,10H78a10,10,0,0,1-10-10V402A74,74,0,0,1,142,328Z"/>
+  <rect class="cls-2" x="204" y="288" width="167" height="74" rx="15" ry="15"/>
+  <path id="Shape_1_copy" data-name="Shape 1 copy" class="cls-3" d="M266.415,75.421c1.259,0.47-1.984,302.515,0,302.515s41.785,1.867,41.785,0-0.476-303.668,0-303.49,18.281-6.546,18.281-6.831S300.6,58.65,300.365,52c-0.28.1-23.447,0.031-33.95,0-3.627,8.092-.768,8.968-20.892,15.614C257.691,72.336,265.947,75.945,266.415,75.421Z"/>
+  <path id="Rounded_Rectangle_1_copy" data-name="Rounded Rectangle 1 copy" class="cls-3" d="M142,321.21H397.824a34,34,0,0,1,34,34v77.925a10,10,0,0,1-10,10H78a10,10,0,0,1-10-10V395.21A74,74,0,0,1,142,321.21Z"/>
+  <path id="Rectangle_1_copy" data-name="Rectangle 1 copy" class="cls-3" d="M215.654,282.194H348.546a15,15,0,0,1,15,15v42.18a15,15,0,0,1-15,15H215.654a15,15,0,0,1-15-15v-42.18A15,15,0,0,1,215.654,282.194Z"/>
+  <path class="cls-4" d="M76,436l1-37s-4.889-58,54-58c-29.264,17.257-38,43.886-38,53v42H76Z"/>
+  <path class="cls-4" d="M210,316l-2-18s-2.525-8,12-8"/>
+  <path class="cls-5" d="M272,57s-7.264,9.842-13,10c2.806,6.96,10.588,3.606,12,11,0.554,11.686,0,203,0,203h6V57"/>
+  <path class="cls-6" d="M313,232c-12.824.566-8.873-8.716-44,1-37.256,5.09-49-.7-60.116-1.635C176.989,220.226,189.608,226.983,139,202c-48.867-24.537-43.743-44.492-70-100,40.431-.088,36.941,11.571,80,7,23.59-2.5,74.768-15.543,120-23,9.648,2.894,44.505,2.211,46-9S316.909,174.063,313,232Z"/>
+</svg>
