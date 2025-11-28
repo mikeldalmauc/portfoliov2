@@ -25,11 +25,32 @@ const paths = {
   // Usamos llaves {} para listar EXACTAMENTE las carpetas que quieres.
   // Esto procesará: gallery, tab1, tab2, tab3 y tab5. Ignorará tab4 u otras.
   targetImages: 'assets/content/{gallery,tab1,tab2,tab3,tab5}/*.{jpg,jpeg,png}',
-  kuskas: 'assets/kuskas/**'
+  kuskas: 'assets/kuskas/*.png'
 };
 
 function clean() {
   return deleteAsync([paths.output]);
+}
+
+// --- TAREA KUSKAS: Redimensionar a 300x300 PNG ---
+function processKuskasTask() {
+  return src(paths.kuskas)
+    .pipe(sharpResponsive({
+      formats: [
+        { 
+          width: 300, 
+          height: 300, 
+          format: "png", 
+          // 'cover' recorta la imagen para llenar el 300x300 sin deformar
+          // si prefieres que se vea entera (con bordes vacíos), usa 'contain' o quita el sharp object.
+          sharp: { 
+             fit: "cover" 
+          }
+        }
+      ]
+    }))
+    // Se guardan en build/assets/kuskas
+    .pipe(dest(`${paths.output}/assets/kuskas`));
 }
 
 // Tarea unificada e inteligente
@@ -96,6 +117,8 @@ const build = series(
 );
 
 export {
+  clean,
+  processKuskasTask as processKuskas,
   kuskasTask as kuskas,
   processImagesTask as images,
   build,
